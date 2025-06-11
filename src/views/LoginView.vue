@@ -5,22 +5,17 @@
             <img src="@/assets/imgs/affiche_login.png" alt="le logo" class="size-full aspect-3/2 object-cover" />
         </div>
 
-        <div class="flex justify-end size-full"> 
+        <div class="flex justify-end items-center size-full"> 
 
-            <div class="mockup-phone z-10 border-base-300 shadow-2xl w-[300px] min-h-[65%] m-6"> 
-
-                <div class="mockup-phone-camera"></div>
+            <div class="mockup-phone rounded-nonef z-10 border-base-300 bg-base-200 shadow-xl/100 w-[300px] h-fit m-6">
                 
-                <div class="mockup-phone-display w-full h-full bg-gradient-to-b from-secondary to-50% to-primary">
-
-                    <div class="px-3 py-16 space-y-2 text-white flex flex-col items-center">
-                        <h2 class="card-title font-semiboldd text-3xl">Login</h2>
-                        <p class="text-center">Connectez Vous pour acceder à votre espace  universitaire.</p>
-                    </div>
+                <div class="mockup-phone-display rounded-nonef w-full h-full">
 
                     <!-- card of login -->
-                    <div class="card card-border border-base-300 bg-base-100 h-full">
-                        <div class="card-body items-center text-center">
+                    <div class="card card-border rounded-none border-base-300 bg-base-100 h-full">
+                        <div class="card-body rounded-none items-center text-center">
+
+                            <h2 class="card-title font-semiboldd text-3xl">Login</h2>
                             
                             <!-- matricule -->
                             <div class="w-full">
@@ -58,11 +53,6 @@
                             <div class="card-actions w-full mt-4">
                                 <p class="text-primary text-end font-bold">Mot de passe oublier ?</p>
                                 <button class="btn btn-primary w-full">Se connecter</button>
-                            </div>
-
-                            <!-- le logo -->
-                            <div>
-                                <img src="@/assets/logo.svg" alt="le logo" class="size-32 mx-auto" />
                             </div>
                         </div>
                     </div>
