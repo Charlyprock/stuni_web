@@ -3,7 +3,7 @@
 
 
 @plugin "daisyui/theme" {
-  name: "corporate";
+  name: "stuni-light";
   default: true;
   prefersdark: false;
   color-scheme: "light";
@@ -39,7 +39,7 @@
 
 
 @plugin "daisyui/theme" {
-  name: "forest";
+  name: "stuni-dark";
   default: false;
   prefersdark: true;
   color-scheme: "dark";
