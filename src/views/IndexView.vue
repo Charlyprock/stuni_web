@@ -33,15 +33,66 @@
         <!-- navbar -->
         <header class="flex items-center justify-between bg-base-100 px-4 m-2 rounded-box h-16 border border-base-300">
 
-            <div class="tooltip tooltip-right" data-tip="Ouvrir/Fermer la Sidebar">
-                <button @click="sidebarCollapsed = !sidebarCollapsed" class="btn btn-ghost p-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5 -rotate-90">
-                        <path fill-rule="evenodd" d="M2.25 6a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V6Zm18 3H3.75v9a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V9Zm-15-3.75A.75.75 0 0 0 4.5 6v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V6a.75.75 0 0 0-.75-.75H5.25Zm1.5.75a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V6Zm3-.75A.75.75 0 0 0 9 6v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V6a.75.75 0 0 0-.75-.75H9.75Z" clip-rule="evenodd" />
-                    </svg>
-                </button>
+            <div class="flex items-center space-x-4">
+                <div class="tooltip tooltip-right" data-tip="Ouvrir/Fermer la Sidebar">
+                    <button @click="sidebarCollapsed = !sidebarCollapsed" class="btn btn-ghost p-(--padding-box)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5 -rotate-90">
+                            <path fill-rule="evenodd" d="M2.25 6a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V6Zm18 3H3.75v9a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V9Zm-15-3.75A.75.75 0 0 0 4.5 6v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V6a.75.75 0 0 0-.75-.75H5.25Zm1.5.75a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V6Zm3-.75A.75.75 0 0 0 9 6v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V6a.75.75 0 0 0-.75-.75H9.75Z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- buttom de recherche -->
+                <div>
+                    <button onclick="search_modal.showModal()" class="btn rounded-box bg-base-200 text-base-content/50 p-(--padding-box) flex items-center justify-between w-[200px] hover:bg-base-300 rounded-field text-sm duration-300">
+                        <div class="flex items-center space-x-2">
+                            <SearchIcon class="size-4"/>
+                            <span>Matricule/code</span>
+                        </div>
+                        <div class="border border-base-300 kbd">
+                            /
+                        </div>
+                    </button>
+
+                    <dialog id="search_modal" class="modal">
+                        <div class="modal-box w-[500px]">
+                            <form class="flex items-center gap-2">
+                                <!-- matricule -->
+                                <div class="flex-1">
+                                    <label class="input validator w-full">
+                                        <MatriculeIcon :class-props="'h-[1em] opacity-50'" />
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="Matricule/code"
+                                            id="input_search"
+                                        />
+                                    </label>
+                                </div>
+
+                                <button class="btn btn-accent">Send</button>
+                            </form>
+                        </div>
+                        <form method="dialog" class="modal-backdrop">
+                            <button>close</button>
+                        </form>
+                    </dialog>
+                </div>
             </div>
 
             <div class="flex items-center space-x-4">
+
+                <!-- l'année -->
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="flex items-center space-x-2 m-1 cursor-pointer hover:bg-base-300 p-(--padding-box) rounded-field text-sm duration-300">
+                        <p>2024/2025</p>
+                        <DirectionIcon class="size-4" />
+                    </div>
+                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-xl border border-base-300">
+                        <li><a>Item 1</a></li>
+                        <li><a>Item 2</a></li>
+                    </ul>
+                </div>
 
                 <!-- therme -->
                 <label class="toggle text-base-content toggle-sm">
@@ -62,7 +113,7 @@
                 </label>
 
                 <!-- notification -->
-                <button class="btn btn-ghost p-2 flex justify-center items-center">
+                <button data-tip="Notification" class="tooltip tooltip-left btn btn-ghost p-(--padding-box) flex justify-center items-center">
                     <div class="indicator">
                         <span class="indicator-item status status-accent -translate-0.5"></span>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
@@ -82,9 +133,7 @@
                             <p class="font-semibold text-sm max-w-14 overflow-hidden text-nowrap text-ellipsis">Name jkkjhk</p>
                             <div class="text-xs text-base-content/50 flex items-center justify-between">
                                 <p>Admin</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                </svg>
+                                <DirectionIcon class="size-4" />
                             </div>
                         </div>
                     </div>
@@ -103,14 +152,43 @@
         <RouterView />
       </main>
     </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import MatriculeIcon from '@/components/icons/MatriculeIcon.vue';
+import DirectionIcon from '@/components/icons/DirectionIcon.vue';
+import SearchIcon from '@/components/icons/SearchIcon.vue';
 
 const sidebarCollapsed = ref(false)
+
+function handleSlashKey(event) {
+    if (event.key === '/') {
+        event.preventDefault();
+        const modal = document.getElementById('search_modal');
+        if (modal && typeof modal.showModal === 'function') {
+            modal.showModal();
+            setTimeout(() => {
+                const input = document.getElementById('input_search');
+                if (input) {
+                    input.focus();
+                }
+            }, 500);
+            
+        }
+    }
+}
+
+onMounted(() => {
+    window.addEventListener('keydown', handleSlashKey);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('keydown', handleSlashKey);
+});
+
 </script>
 
 <style scoped>

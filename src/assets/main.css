@@ -73,6 +73,10 @@
   --noise: 0;
 }
 
+:root {
+  --padding-box: 0.5rem;
+}
+
 html{
   background-color: var(--color-base-200);
 }
