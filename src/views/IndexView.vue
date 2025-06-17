@@ -3,27 +3,97 @@
 
     <aside :class="[sidebarCollapsed ? 'w-20' : 'w-64', 'transition-all duration-700']">
         <Transition name="sirbar" mode="out-in">
-            <div v-if="!sidebarCollapsed" class="w-64 transition-all bg-base-100 h-full border-r border-base-300">
-                <div class="p-4 font-bold">Admin Panel</div>
+            <div v-if="!sidebarCollapsed" class="w-64 p-(--padding-box) transition-all bg-base-100 h-full border-r border-base-300">
+
+                <!-- le logo -->
+                <div class="flex justify-center items-center my-3">
+                    <img src="@/assets/logo.svg" alt="notre logo" class="size-[50px]">
+                </div>
+
+                <!-- name of institution -->
+                <div class="w-full bg-primary/10 text-primary borderj border-primary/20 h-[50px] flex justify-center items-center p-2 rounded-box mt-2 mb-4">
+                    <p class="uppercase font-semibold">iut de douala</p>
+                </div>
+                
                 <nav class="mt-4">
-                <RouterLink to="/" class="flex items-center p-3 hover:bg-gray-100">
-                    <span>🏠</span>
-                    <span class="ml-3">Dashboard</span>
-                </RouterLink>
-                <RouterLink to="/users" class="flex items-center p-3 hover:bg-gray-100">
-                    <span>👥</span>
-                    <span class="ml-3">Users</span>
-                </RouterLink>
+
+                    <!-- onglet de base -->
+                    <div>
+                        <!-- title -->
+                        <div class="flex items-center justify-center gap-2 text-base-content/50 italic">
+                            <span>Base</span>
+                            <div class="h-[1px] flex-1 bg-base-content/30"></div>
+                        </div>
+
+                        <ul class="text-base-content menu w-full bg-primaryd p-0d">
+                            <li>
+                                <details open>
+                                    <summary>
+                                        <StudentIcon class="size-(--size-icon)"/>
+                                        Etudiants
+                                    </summary>
+                                    <ul>
+                                        <li>
+                                            <a class="menu-active">
+                                                <ListIcon class="size-(--size-icon)" />
+                                                Liste
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a>
+                                                <AddIcon class="size-(--size-icon)" />
+                                                Add
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </details>
+                            </li>
+                        </ul>
+                    </div>
                 </nav>
             </div>
 
-            <div v-else-if="sidebarCollapsed" class="w-20 transition-all bg-base-100 h-full border-r border-base-300">
-                <MatriculeIcon class="h-6 w-6 mx-auto" />
-                <MatriculeIcon class="h-6 w-6 mx-auto mt-4" />
-                <MatriculeIcon class="h-6 w-6 mx-auto mt-4" />
-                <MatriculeIcon class="h-6 w-6 mx-auto mt-4" />
-                <MatriculeIcon class="h-6 w-6 mx-auto mt-4" />
-                <MatriculeIcon class="h-6 w-6 mx-auto mt-4" />
+            <div v-else-if="sidebarCollapsed" class="w-20 p-(--padding-box) transition-all bg-base-100 h-full border-r border-base-300">
+                <!-- le logo -->
+                <div class="flex justify-center items-center my-3">
+                    <img src="@/assets/logo.svg" alt="notre logo" class="size-[30px]">
+                </div>
+
+                <!-- name of institution -->
+                <div data-tip="iut de douala" class="tooltip tooltip-right w-full bg-primary/10 text-primary borderj border-primary/20 h-[50px] p-2 rounded-box mt-2"></div>
+                
+                <nav class="mt-4">
+
+                    <!-- onglet de base -->
+                    <div class="">
+                        <!-- title -->
+                        <div class="flex items-center justify-center gap-2 text-base-content/50 italic pb-1">
+                            <div class="h-[1px] flex-1 bg-base-content/30"></div>
+                        </div>
+
+                        <ul class="text-base-content menu w-full p-0 m-0 ms-0 ps-0">
+                            <li> 
+                                <details open>
+                                    <summary class="tooltip tooltip-right" data-tip="Etudiants">
+                                        <StudentIcon class="size-(--size-icon)"/>
+                                    </summary>
+                                    <ul>
+                                        <li>
+                                            <a class="menu-active tooltip tooltip-right" data-tip="Liste des etudiants">
+                                                <ListIcon class="size-(--size-icon)" />
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="tooltip tooltip-right" data-tip="Ajouter un etudiant">
+                                                <AddIcon class="size-(--size-icon)" />
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </details>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
             </div>
         </Transition>
     </aside>
@@ -161,6 +231,10 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import MatriculeIcon from '@/components/icons/MatriculeIcon.vue';
 import DirectionIcon from '@/components/icons/DirectionIcon.vue';
 import SearchIcon from '@/components/icons/SearchIcon.vue';
+import StudentIcon from '@/components/icons/StudentIcon.vue';
+import TeacherIcon from '@/components/icons/TeacherIcon.vue';
+import ListIcon from '@/components/icons/ListIcon.vue';
+import AddIcon from '@/components/icons/AddIcon.vue';
 
 const sidebarCollapsed = ref(false)
 
