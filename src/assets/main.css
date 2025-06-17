@@ -75,7 +75,7 @@
 
 :root {
   --padding-box: 0.5rem;
-  --size-icon: 1.25rem;
+  --icon-size: 1.25rem;
 }
 
 html{

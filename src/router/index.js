@@ -8,7 +8,13 @@ const router = createRouter({
     { path: '/', name: 'login', component: LoginView, },
     { path: '/profil', component: IndexView,
       children: [
-        { path: '', name: 'student', component: () => import('@/views/StudentView.vue') },
+        { path: '', name: 'student',
+          children: [
+            {path: '', name: 'student-list', component: () => import('@/views/StudentListView.vue')},
+            {path: 'student-add', name: 'student-add', component: () => import('@/views/StudentAddView.vue')}
+          ]
+        },
+        
       ],
     },
 

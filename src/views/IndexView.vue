@@ -29,21 +29,21 @@
                             <li>
                                 <details open>
                                     <summary>
-                                        <StudentIcon class="size-(--size-icon)"/>
+                                        <StudentIcon class="size-(--icon-size)"/>
                                         Etudiants
                                     </summary>
                                     <ul>
                                         <li>
-                                            <a class="menu-active">
-                                                <ListIcon class="size-(--size-icon)" />
+                                            <RouterLink :to="{name: 'student-list'}" class="menu-active">
+                                                <ListIcon class="size-(--icon-size)" />
                                                 Liste
-                                            </a>
+                                            </RouterLink>
                                         </li>
                                         <li>
-                                            <a>
-                                                <AddIcon class="size-(--size-icon)" />
+                                            <RouterLink :to="{name: 'student-add'}">
+                                                <AddIcon class="size-(--icon-size)" />
                                                 Add
-                                            </a>
+                                            </RouterLink>
                                         </li>
                                     </ul>
                                 </details>
@@ -75,18 +75,18 @@
                             <li> 
                                 <details open>
                                     <summary class="tooltip tooltip-right" data-tip="Etudiants">
-                                        <StudentIcon class="size-(--size-icon)"/>
+                                        <StudentIcon class="size-(--icon-size)"/>
                                     </summary>
                                     <ul>
                                         <li>
-                                            <a class="menu-active tooltip tooltip-right" data-tip="Liste des etudiants">
-                                                <ListIcon class="size-(--size-icon)" />
-                                            </a>
+                                            <RouterLink :to="{name: 'student-list'}" class="menu-active tooltip tooltip-right" data-tip="Liste des etudiants">
+                                                <ListIcon class="size-(--icon-size)" />
+                                            </RouterLink>
                                         </li>
                                         <li>
-                                            <a class="tooltip tooltip-right" data-tip="Ajouter un etudiant">
-                                                <AddIcon class="size-(--size-icon)" />
-                                            </a>
+                                            <RouterLink :to="{name: 'student-add'}" class="tooltip tooltip-right" data-tip="Ajouter un etudiant">
+                                                <AddIcon class="size-(--icon-size)" />
+                                            </RouterLink>
                                         </li>
                                     </ul>
                                 </details>
