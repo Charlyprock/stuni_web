@@ -34,13 +34,13 @@
                                     </summary>
                                     <ul>
                                         <li>
-                                            <RouterLink :to="{name: 'student-list'}" class="menu-active">
+                                            <RouterLink :to="{name: 'student-list'}" exact-active-class="menu-active" class="">
                                                 <ListIcon class="size-(--icon-size)" />
                                                 Liste
                                             </RouterLink>
                                         </li>
                                         <li>
-                                            <RouterLink :to="{name: 'student-add'}">
+                                            <RouterLink :to="{name: 'student-add'}" exact-active-class="menu-active">
                                                 <AddIcon class="size-(--icon-size)" />
                                                 Add
                                             </RouterLink>
@@ -79,12 +79,12 @@
                                     </summary>
                                     <ul>
                                         <li>
-                                            <RouterLink :to="{name: 'student-list'}" class="menu-active tooltip tooltip-right" data-tip="Liste des etudiants">
+                                            <RouterLink :to="{name: 'student-list'}" exact-active-class="menu-active" class="tooltip tooltip-right" data-tip="Liste des etudiants">
                                                 <ListIcon class="size-(--icon-size)" />
                                             </RouterLink>
                                         </li>
                                         <li>
-                                            <RouterLink :to="{name: 'student-add'}" class="tooltip tooltip-right" data-tip="Ajouter un etudiant">
+                                            <RouterLink :to="{name: 'student-add'}" exact-active-class="menu-active" class="tooltip tooltip-right" data-tip="Ajouter un etudiant">
                                                 <AddIcon class="size-(--icon-size)" />
                                             </RouterLink>
                                         </li>

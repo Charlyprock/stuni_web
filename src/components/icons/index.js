@@ -7,6 +7,7 @@ import PasswordIcon from "./PasswordIcon.vue"
 import DeleteIcon from "./DeleteIcon.vue"
 import DirectionIcon from "./DirectionIcon.vue"
 import FilterIcon from "./FilterIcon.vue"
+import CheckIcon from "./CheckIcon.vue"
 
 export {
     AddIcon,
@@ -18,4 +19,5 @@ export {
     DeleteIcon,
     DirectionIcon,
     FilterIcon,
+    CheckIcon
 }
