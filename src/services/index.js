@@ -1,1 +1,3 @@
-export * from './test.service'
+export * from './level.service'
+export * from './classe.service'
+export * from './speciality.service'

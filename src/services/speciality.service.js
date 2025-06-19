@@ -4,6 +4,6 @@ let test = () => {
     return Axios.get('/test/')
 }
 
-export const Test = {
+export const SpecialityService = {
     test
 }
