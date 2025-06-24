@@ -120,7 +120,7 @@
                             <span>Matricule/code</span>
                         </div>
                         <div class="border border-base-300 kbd">
-                            /
+                            Ctrl k
                         </div>
                     </button>
 
@@ -239,7 +239,7 @@ import AddIcon from '@/components/icons/AddIcon.vue';
 const sidebarCollapsed = ref(false)
 
 function handleSlashKey(event) {
-    if (event.key === '/') {
+    if (event.ctrlKey && event.key === 'k') {
         event.preventDefault();
         const modal = document.getElementById('search_modal');
         if (modal && typeof modal.showModal === 'function') {

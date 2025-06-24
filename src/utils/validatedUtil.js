@@ -140,6 +140,14 @@ function validateSingleField(fieldName, validationRules, form) {
   }
 }
 
+function clearFormData(formData){
+  const form = {}
+  Object.keys(formData).forEach(key => {
+    form[key] = null
+  })
+  return form
+}
+
 // Exemple d'utilisation
 function submitForm() {
   const result = processForm(validationRules, form)
@@ -161,5 +169,6 @@ export const ValidatedUtil = {
   validateForm,
   validateSingleField,
   createFormData,
+  clearFormData,
   processForm,
 }

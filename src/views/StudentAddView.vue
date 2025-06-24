@@ -7,7 +7,10 @@
 			<h1 class="text-xl text-nowrap">Nouveau Etudiants</h1>
 
 			<div class="flex gap-3 items-center fixed bottom-3 right-3 p-2 bg-base-100 rounded-box border border-base-300">
-				<button class="btn btn-primary">Soumetre</button>
+				<button class="btn btn-primary" :disabled="loading.send">
+					<p>Soumetre</p>
+					<LoadingIcon v-if="loading.send" class="size-(--icon-size)" />
+                </button>
 			</div>
 		</header>
 
@@ -15,7 +18,7 @@
 		<div class="flex justify-center">
 			<div class="size-[250px] bg-base-100 p-(--padding-box) rounded-full border border-base-300">
 				<div class="size-full">
-					<ImageUploader ref="imageUploader" 
+					<ImageUploader ref="uploaderComponent" 
 						:default-image-url="null" 
 						:max-size-m-b="5"
 						:max-width="800" 
@@ -154,6 +157,7 @@
 						</li>
                     </ul>
                 </div>
+				<p v-for="error in errors['level']" class="text-error text-start">{{ error }}</p>
 
 				<!-- specialité -->
                 <div class="dropdown dropdown-start w-full">
@@ -172,6 +176,7 @@
 						</li>
                     </ul>
                 </div>
+				<p v-for="error in errors['speciality']" class="text-error text-start">{{ error }}</p>
 
 				<!-- classe -->
                 <div class="dropdown dropdown-start w-full">
@@ -190,6 +195,7 @@
 						</li>
                     </ul>
                 </div>
+				<p v-for="error in errors['classe']" class="text-error text-start">{{ error }}</p>
 
 				<label class="label">Année acardemic</label>
 				<input v-model="form.year" type="text" class="input w-full validator" 
@@ -217,14 +223,16 @@ import {
 	HiddenPasswordIcon, VuePasswordIcon,
 } from '@/components/icons';
 import ImageUploader from '@/components/ImageUploaderComponent.vue';
-import { LevelService, SpecialityService } from '@/services';
+import { LevelService, SpecialityService, StudentService } from '@/services';
 import { NotificationUtil, DateUtil, ValidatedUtil } from '@/utils';
 import { onMounted, ref, watch } from 'vue';
 
 const Notification = NotificationUtil.notificationsUtil()
 
+const uploaderComponent = ref(null)
 let errors = ref({})
 const loading = ref({
+	send: false,
 	level: false,
 	speciality: false,
 	classe: false
@@ -460,11 +468,15 @@ function onImageError(error) {
 	Notification.error(error, 'Erreur lors du traitement de l\'image.')
 }
 
-function validated(){
+function resetImage(){
+	if(uploaderComponent.value){
+		uploaderComponent.value.reset()
+	}
+}
 
+function validated(){
 	const result = ValidatedUtil.processForm(validationRules.value, form.value)
 	errors.value = result.errors
-	console.log(result.errors, form.value, result.formData)
 	if(result.success){
 		save(result.formData)
 	} else {
@@ -473,6 +485,18 @@ function validated(){
 }
 
 function save(formData){
-	console.log(formData)
+	loading.value.send = true
+	
+	StudentService.setStudent(formData).then((res) => {
+		Notification.success("Etudiant enregitré avec succes.")
+		form.value = ValidatedUtil.clearFormData(form.value)
+		form.value.level = select.value.level.id
+		form.value.speciality = select.value.level.id
+		form.value.classe = select.value.classe.id
+		resetImage()
+	}).catch((error) => {
+		Notification.error("Erreur lors de la sauvegade des données.")
+		errors.value = error.response.data
+	}).finally(() => loading.value.send = false)
 }
 </script>
