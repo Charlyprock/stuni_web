@@ -31,28 +31,28 @@
 
                             <!-- password -->
                             <div class="w-full">
-                                <label class="input validator">
+                                <label class="input">
                                     <PasswordIcon :class-props="'h-[1em] opacity-50'" />
                                     <input
-                                        type="password"
+                                        :type="!isShowPassword ? 'password' : 'text'"
                                         required
                                         placeholder="Password"
-                                        minlength="8"
-                                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                                        title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
                                     />
+
+                                    <button @click="togglePasswordVisibility" class="label cursor-pointer">
+                                        <VuePasswordIcon v-if="!isShowPassword" class=" size-(--icon-size)" />
+                                        <HiddenPasswordIcon v-if="isShowPassword" class=" size-(--icon-size)" />
+                                    </button>
                                 </label>
-                                <p class="validator-hint hidden text-start">
-                                    Must be more than 8 characters, including
-                                    <br/>At least one number
-                                    <br/>At least one lowercase letter
-                                    <br/>At least one uppercase letter
-                                </p>
                             </div>
                         
                             <div class="card-actions w-full mt-4">
                                 <p class="text-primary text-end font-bold">Mot de passe oublier ?</p>
-                                <button class="btn btn-primary w-full">Se connecter</button>
+
+                                <button class="btn btn-primary w-full" :disabled="loading">
+                                    <p>Se connecter</p>
+                                    <LoadingIcon v-if="loading" class="size-(--icon-size)" />
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -64,7 +64,19 @@
 </template>
 
 <script setup>
-    import PasswordIcon from '@/components/icons/PasswordIcon.vue';
-    import MatriculeIcon from '@/components/icons/MatriculeIcon.vue';
+import { 
+    VuePasswordIcon, MatriculeIcon, 
+    PasswordIcon, HiddenPasswordIcon ,
+    LoadingIcon,
+} from '@/components/icons';
+import { ref } from 'vue';
+
+
+const loading = ref(false)
+
+const isShowPassword = ref(false)
+const togglePasswordVisibility = () => {
+    isShowPassword.value = !isShowPassword.value
+}
 
 </script>

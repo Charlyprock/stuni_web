@@ -1,66 +1,87 @@
 <template>
-    <form @submit.prevent="save" class="flex flex-col gap-5">
+    <form @submit.prevent="validated" class="flex flex-col gap-5">
 		<!-- bare de recherche, titre, et bouton ajouter -->
 		<header class="w-full bg-base-100 border border-base-300 flex justify-between items-center p-3 rounded-box">
 
 			<!-- title -->
 			<h1 class="text-xl text-nowrap">Nouveau Etudiants</h1>
 
-			<div class="flex gap-3 items-center">
+			<div class="flex gap-3 items-center fixed bottom-3 right-3 p-2 bg-base-100 rounded-box border border-base-300">
 				<button class="btn btn-primary">Soumetre</button>
 			</div>
 		</header>
+
+		<!-- l'image -->
+		<div class="flex justify-center">
+			<div class="size-[250px] bg-base-100 p-(--padding-box) rounded-full border border-base-300">
+				<div class="size-full">
+					<ImageUploader ref="imageUploader" 
+						:default-image-url="null" 
+						:max-size-m-b="5"
+						:max-width="800" 
+						:max-height="800" 
+						:allowed-formats="['jpg', 'jpeg', 'png', 'webp']" 
+						:quality="0.9"
+						:auto-resize="true" 
+						:show-image-info="false" 
+						alt="Photo de profil" 
+						@image-changed="onImageChanged"
+						@image-removed="onImageRemoved" 
+						@error="onImageError" 
+					/>
+				</div>
+			</div>
+		</div>
 
 		<div class="flex justify-center gap-5">
 
 			<!-- info personnel -->
 			<div class="w-[40%] space-y-5">
 
-				<!-- l'image -->
-				<div class="w-full h-[100px] bg-base-100 p-(--padding-box) rounded-box border border-base-300">
-					<div class="w-full h-full rounded-box border border-inherit border-dashed"></div>
-				</div>
-
 				<!-- autre info -->
 				<fieldset class="fieldset w-full bg-base-100 p-4 rounded-box border border-base-300">
 					<legend class="fieldset-legend">Information Personnel</legend>
 
-					<label class="label">Matricule <span class="text-error text-lg">*</span></label>
+					<label class="label">Matricule</label>
+					<label class="label text-success text-xm">Pas requis, calculé automatiquement.</label>
 					<input type="text" class="input w-full validator" 
-						pattern="(?=.*\d)(?=.*[a-z-A-Z])"
 						maxlength="20" 
-						placeholder="STU2025GL0001" 
-						required
+						placeholder="STU2025GL0001"
 						v-model="form.code"
 					/>
-					<p class="validator-hint hidden text-start">
-						Doit contenir des chiffres et lettres.
-					</p>
+					<p v-for="error in errors['code']" class="text-error text-start">{{ error }}</p>
 
 					<label class="label">Nom <span class="text-error text-lg">*</span></label>
 					<input v-model="form.last_name" type="text" class="input w-full" placeholder="KOLO" required />
+					<p v-for="error in errors['last_name']" class="text-error text-start">{{ error }}</p>
 
 					<label class="label">Prénom <span class="text-error text-lg">*</span></label>
 					<input v-model="form.first_name" type="text" class="input w-full" placeholder="Toto" required />
+					<p v-for="error in errors['first_name']" class="text-error text-start">{{ error }}</p>
 					
 					<label class="label">Mot de passe <span class="text-error text-lg">*</span></label>
-					<input
-					 	v-model="form.password"
-						class="input w-full validator"
-						type="password"
-						required
-						placeholder="Password"
-						minlength="8"
-						pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-						title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
-					/>
+					<label class="input w-full validator">
+						<input
+							v-model="form.password"
+                            :type="!isShowPassword ? 'password' : 'text'"
+							required
+							placeholder="Password"
+							minlength="8"
+							title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
+						/>
+
+						<button type="button" @click="togglePasswordVisibility" class="label cursor-pointer">
+							<VuePasswordIcon v-if="!isShowPassword" class=" size-(--icon-size)" />
+							<HiddenPasswordIcon v-if="isShowPassword" class=" size-(--icon-size)" />
+						</button>
+					</label>
 					<p class="validator-hint hidden text-start">
 						Doit contenir au mois 8 caractéres et inclure
-						Must be more than 8 characters, including
 						<br/>un nombre
 						<br/>une lettre en majuscule
 						<br/>une lettre en minuscule
 					</p>
+					<p v-for="error in errors['password']" class="text-error text-start">{{ error }}</p>
 
 					<fieldset class="fieldset flex gap-3">
 						<legend class="fieldset-legend">genre</legend>
@@ -71,38 +92,42 @@
 						<label class="label" for="feminin">Féminin</label>
 						<input v-model="form.genre" id="feminin" type="radio" name="radio-1" class="radio" value="F" />
 					</fieldset>
+					<p v-for="error in errors['genre']" class="text-error text-start">{{ error }}</p>
 
 					<label class="label">Email</label>
 					<input v-model="form.email" type="text" class="input w-full" placeholder="example@gmail.com" />
+					<p v-for="error in errors['email']" class="text-error text-start">{{ error }}</p>
 
 					<label class="label">Tel</label>
 					<input type="text" class="input w-full validator" 
 						v-model="form.phone"
-						pattern="(?=.*\d).{9,}"
-						maxlength="9"
+						maxlength="13"
 						minlength="9"
 						placeholder="6-- -- -- --" 
 					/>
-					<p class="validator-hint hidden text-start">
-						Ne doit contenir que des chiffres et 9 caractéres.
-					</p>
+					<p v-for="error in errors['phone']" class="text-error text-start">{{ error }}</p>
 
 					<label class="label">Addresse</label>
 					<input v-model="form.address" type="text" class="input w-full" placeholder="Douala" />
+					<p v-for="error in errors['address']" class="text-error text-start">{{ error }}</p>
 
 					<label class="label">Nationnalité</label>
 					<input v-model="form.nationnality" type="text" class="input w-full" placeholder="Cameroun" />
+					<p v-for="error in errors['nationnality']" class="text-error text-start">{{ error }}</p>
 
 					<label class="label">Date de naissance</label>
 					<input v-model="form.birth_date" type="date" class="input w-full" placeholder="Douala" />
+					<p v-for="error in errors['birth_date']" class="text-error text-start">{{ error }}</p>
 
 					<label class="label">Lieux de naissance</label>
 					<input v-model="form.birth_place" type="text" class="input w-full" placeholder="Douala" />
+					<p v-for="error in errors['birth_place']" class="text-error text-start">{{ error }}</p>
 
 					<label class="label my-2">
 						<input v-model="form.is_work" type="checkbox" class="toggle" />
 						Travaille
 					</label>
+					<p v-for="error in errors['is_work']" class="text-error text-start">{{ error }}</p>
 
 				</fieldset>
 
@@ -110,12 +135,12 @@
 
 			<!-- info inscription -->
 			<fieldset class="fieldset w-[40%] space-y-3 h-fit bg-base-100 p-4 rounded-box border border-base-300">
-				<legend class="fieldset-legend">Information inscription</legend>
+				<legend class="fieldset-legend">Information inscription <span class="text-error text-lg">*</span></legend>
 
 				<!-- Niveau -->
                 <div class="dropdown dropdown-start w-full">
                     <button tabindex="0" role="button" class="w-full flex items-center justify-between btn btn-outline border-base-300 p-(--padding-box) text-sm">
-                        <p class="text-nowrap overflow-hidden text-ellipsis max-w-[80%]">Niveau ({{ form.level?.name }})</p>
+                        <p class="text-nowrap overflow-hidden text-ellipsis max-w-[80%]">Niveau ({{ select.level?.name }})</p>
                         <LoadingIcon v-if="loading.level" class="size-(--icon-size)" />
 						<DirectionIcon v-else class="size-(--icon-size)" />
                     </button>
@@ -123,7 +148,7 @@
                     <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 mt-1 max-h-[300px] flex-nowrap overflow-y-auto p-2 shadow-xl border border-base-300">
                         <li @click="select_level(level)" v-for="level in levels" :key="level.id" class="max-w-full overflow-hidden rounded-field">
 							<div class="flex items-center gap-2 w-full">
-								<CheckIcon :class="[form.level.id != level.id ? 'text-transparent': '', 'size-(--icon-size)']" />
+								<CheckIcon :class="[select.level.id != level.id ? 'text-transparent': '', 'size-(--icon-size)']" />
 								<a class="text-nowrap overflow-hidden text-ellipsis flex-1">{{ level.name }}</a>
 							</div>
 						</li>
@@ -131,9 +156,9 @@
                 </div>
 
 				<!-- specialité -->
-                <div class="dropdown dropdown-end w-full">
+                <div class="dropdown dropdown-start w-full">
                     <button :disabled="specialitys.length < 1" tabindex="0" role="button" class="w-full flex items-center justify-between btn btn-outline border-base-300 p-(--padding-box) text-sm">
-                        <p class="text-nowrap overflow-hidden text-ellipsis max-w-[80%]">Spécialité ({{ form.speciality?.name }})</p>
+                        <p class="text-nowrap overflow-hidden text-ellipsis max-w-[80%]">Spécialité ({{ select.speciality?.name }})</p>
                         <LoadingIcon v-if="loading.speciality" class="size-(--icon-size)" />
 						<DirectionIcon v-else class="size-(--icon-size)" />
                     </button>
@@ -141,7 +166,7 @@
                     <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 mt-1 max-h-[300px] flex-nowrap overflow-y-auto p-2 shadow-xl border border-base-300">
                         <li @click="select_speciality(speciality)" v-for="speciality in specialitys" :key="speciality.id" class="max-w-full overflow-hidden rounded-field">
 							<div class="flex items-center gap-2 w-full">
-								<CheckIcon :class="[form.speciality.id != speciality.id ? 'text-transparent': '', 'size-(--icon-size)']" />
+								<CheckIcon :class="[select.speciality.id != speciality.id ? 'text-transparent': '', 'size-(--icon-size)']" />
 								<a class="text-nowrap overflow-hidden text-ellipsis flex-1">{{ speciality.name }}</a>
 							</div>
 						</li>
@@ -149,17 +174,18 @@
                 </div>
 
 				<!-- classe -->
-                <div class="dropdown dropdown-end w-full">
-                    <button tabindex="0" role="button" disabled class="w-full flex items-center justify-between btn btn-outline border-base-300 p-(--padding-box) text-sm">
-                        <p>Classe (Niveau 1)</p>
-                        <DirectionIcon class="size-(--icon-size)" />
+                <div class="dropdown dropdown-start w-full">
+                    <button :disabled="classes.length < 1" tabindex="0" role="button" class="w-full flex items-center justify-between btn btn-outline border-base-300 p-(--padding-box) text-sm">
+                        <p class="text-nowrap overflow-hidden text-ellipsis max-w-[80%]">Classe ({{ select.classe?.abbreviation }})</p>
+                        <LoadingIcon v-if="loading.classe" class="size-(--icon-size)" />
+						<DirectionIcon v-else class="size-(--icon-size)" />
                     </button>
 
-                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 max-h-[300px] flex-nowrap overflow-y-auto p-2 shadow-xl border border-base-300">
-                        <li v-for="i in 10" class="text-nowrap overflow-hidden text-ellipsis">
-							<div class=" flex items-center gap-2">
-								<CheckIcon class="size-(--icon-size)" />
-								<a>classe i</a>
+                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 mt-1 max-h-[300px] flex-nowrap overflow-y-auto p-2 shadow-xl border border-base-300">
+                        <li @click="select_classe(classe)" v-for="classe in classes" :key="classe.id" class="max-w-full overflow-hidden rounded-field">
+							<div class="flex items-center gap-2 w-full">
+								<CheckIcon :class="[select.classe.id != classe.id ? 'text-transparent': '', 'size-(--icon-size)']" />
+								<a class="text-nowrap overflow-hidden text-ellipsis flex-1">{{ classe.abbreviation }}</a>
 							</div>
 						</li>
                     </ul>
@@ -170,33 +196,54 @@
 					pattern="(?=.*\d).{9,}"
 					maxlength="9" 
 					placeholder="2024/2025" 
+					required
 				/>
-				<p class="validator-hint hidden text-start">
-					Non valide
-				</p>
+				<p v-for="error in errors['year']" class="text-error text-start">{{ error }}</p>
 
 				<label class="label my-2">
 					<input v-model="form.is_delegate" value="true" type="checkbox" class="toggle" />
 					Délégué
 				</label>
+				<p v-for="error in errors['is_delegate']" class="text-error text-start">{{ error }}</p>
 			</fieldset>
 		</div>
     </form>
 </template>
 
 <script setup>
-import { PasswordIcon, DirectionIcon, CheckIcon, LoadingIcon } from '@/components/icons';
-import { LevelService } from '@/services';
-import { onMounted, ref } from 'vue';
+import { 
+	PasswordIcon, DirectionIcon, 
+	CheckIcon, LoadingIcon,
+	HiddenPasswordIcon, VuePasswordIcon,
+} from '@/components/icons';
+import ImageUploader from '@/components/ImageUploaderComponent.vue';
+import { LevelService, SpecialityService } from '@/services';
+import { NotificationUtil, DateUtil, ValidatedUtil } from '@/utils';
+import { onMounted, ref, watch } from 'vue';
 
+const Notification = NotificationUtil.notificationsUtil()
+
+let errors = ref({})
 const loading = ref({
 	level: false,
 	speciality: false,
 	classe: false
 })
 
+const isShowPassword = ref(false)
+const togglePasswordVisibility = () => {
+    isShowPassword.value = !isShowPassword.value
+}
+
+const select = ref({
+	level: null,
+	speciality: null,
+	classe: null
+})
+
 const levels = ref([])
 const specialitys = ref([])
+const classes = ref([])
 
 const form = ref({
 	email: null,
@@ -219,59 +266,213 @@ const form = ref({
 	is_work: null,
 })
 
+	
+const validationRules = ref({
+	email: {
+		required: false,
+		pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+		message: 'Email invalide'
+	},
+	password: {
+		required: true,
+		minLength: 8,
+		pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+		message: 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial'
+	},
+	first_name: {
+		required: true,
+		minLength: 2,
+		maxLength: 50,
+		pattern: /^[a-zA-ZÀ-ÿ\s'-]+$/,
+		message: 'Prénom invalide (2-50 caractères, lettres uniquement)'
+	},
+	last_name: {
+		required: true,
+		minLength: 2,
+		maxLength: 50,
+		pattern: /^[a-zA-ZÀ-ÿ\s'-]+$/,
+		message: 'Nom invalide (2-50 caractères, lettres uniquement)'
+	},
+	code: {
+		required: false,
+		pattern: /^[A-Za-z0-9]{6,20}$/,
+		message: 'Code invalide (6-10 caractères alphanumériques)'
+	},
+	phone: {
+		required: false,
+		pattern: /^(\+237|237)?[2-9]\d{8}$/,
+		message: 'Numéro de téléphone camerounais invalide'
+	},
+	address: {
+		required: false,
+		minLength: 10,
+		maxLength: 200,
+		message: 'Adresse invalide (10-200 caractères)'
+	},
+	genre: {
+		required: false,
+		options: ['M', 'F'],
+		message: 'Genre requis (M, F)'
+	},
+	nationnality: {
+		required: false,
+		minLength: 2,
+		maxLength: 50,
+		message: 'Nationalité requise'
+	},
+	image: {
+		required: false,
+		fileTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+		maxSize: 5 * 1024 * 1024, // 5MB
+		message: 'Image invalide (JPEG, PNG, GIF, WebP, max 5MB)'
+	},
+	level: {
+		required: true,
+		message: 'Niveau d\'études requis'
+	},
+	speciality: {
+		required: true,
+		minLength: 2,
+		maxLength: 100,
+		message: 'Spécialité requise (2-100 caractères)'
+	},
+	classe: {
+		required: true,
+		minLength: 2,
+		maxLength: 50,
+		message: 'Classe requise (2-50 caractères)'
+	},
+	year: {
+		required: true,
+		custom: (value) => DateUtil.validateYearFormat(value),
+		message: 'Année académique invalide (format: YYYY/YYYY+1)'
+	},
+	is_delegate: {
+		required: false,
+		type: 'boolean',
+		message: 'Statut de délégué requis'
+	},
+	birth_date: {
+		required: false,
+		custom: (value) => DateUtil.validateBirthDate(value, { minAge: 16, maxAge: 60, format: 'YYYY-MM-DD' }),
+		message: 'Date de naissance invalide (âge entre 16 et 60 ans)'
+	},
+	birth_place: {
+		required: false,
+		minLength: 2,
+		maxLength: 100,
+		message: 'Lieu de naissance requis (2-100 caractères)'
+	},
+	is_work: {
+		required: false,
+		type: 'boolean',
+		message: 'Statut professionnel requis'
+	}
+})
+
 onMounted(() => {
 	loading.value.level = true
 	LevelService.get_level().then((res) => {
 		loading.value.level = false
 		levels.value = res.data
 		if(res.data.length >= 1){
-			form.value.level = res.data[0]
+			form.value.level = res.data[0].id
+			select.value.level = res.data[0]
 			get_specialitys(res.data[0].id)
 		}
 	})
 })
 
+watch(() => select.value.speciality, (speciality) => {
+	get_classes(speciality?.id)
+})
+
 function select_level(level){
 
-	if(form.value.level.id != level.id){
+	if(form.value.level != level.id){
 		loading.value.speciality = true
-		form.value.level = level
+		form.value.level = level.id
+		select.value.level = level
 	
 		get_specialitys(level.id)
 	}
 }
 
 function select_speciality(speciality){
-	form.value.speciality = speciality
+	// la requette s'effectue dans un watcher
+	form.value.speciality = speciality.id
+	select.value.speciality = speciality
+}
 
-	// if(form.value.level.id != level.id){
-	// 	form.value.level = level
+function select_classe(classe){
 	
-	// 	LevelService.get_level(level.id).then((res) => {
-	// 		const  data = res.data.specialitys
-	// 		if(data.length >= 1){
-	// 			form.value.speciality = data[0]
-	// 			specialitys.value = data
-	// 		}
-	// 	})
-	// }
+	if (classe.id != select.value.classe){
+		form.value.classe = classe.id
+		select.value.classe = classe
+	}
 }
 
 function get_specialitys(level_id){
 	specialitys.value = []
 	form.value.speciality = null
+	select.value.speciality = null
 
 	LevelService.get_level(level_id).then((res) => {
 		loading.value.speciality = false
 		const  data = res.data.specialitys
 		if(data.length >= 1){
-			form.value.speciality = data[0]
+			form.value.speciality = data[0].id
+			select.value.speciality = data[0]
 			specialitys.value = data
 		}
 	})
 }
 
-function save(){
-	alert("save")
+function get_classes(speciality_id){
+	classes.value = []
+	form.value.classe = null
+	select.value.classe = null
+
+	if (speciality_id){
+		SpecialityService.get_speciality(speciality_id).then((res) => {
+			loading.value.classe = false
+			const  data = res.data.classes
+			if(data.length >= 1){
+				form.value.classe = data[0].id
+				select.value.classe = data[0]
+				classes.value = data
+			}
+		})
+	}
+}
+
+function onImageChanged(data) {
+	form.value.image = data.file
+	// imageInfo = data.info
+}
+
+function onImageRemoved() {
+	form.value.image = null
+	// imageInfo = null
+}
+
+function onImageError(error) {
+	Notification.error(error, 'Erreur lors du traitement de l\'image.')
+}
+
+function validated(){
+
+	const result = ValidatedUtil.processForm(validationRules.value, form.value)
+	errors.value = result.errors
+	console.log(result.errors, form.value, result.formData)
+	if(result.success){
+		save(result.formData)
+	} else {
+		Notification.error("error", "erreur du formulaire.")
+	}
+}
+
+function save(formData){
+	console.log(formData)
 }
 </script>

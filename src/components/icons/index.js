@@ -9,6 +9,9 @@ import DirectionIcon from "./DirectionIcon.vue"
 import FilterIcon from "./FilterIcon.vue"
 import CheckIcon from "./CheckIcon.vue"
 import LoadingIcon from "./LoadingIcon.vue"
+import VuePasswordIcon from "./VuePasswordIcon.vue"
+import HiddenPasswordIcon from "./HiddenPasswordIcon.vue"
+import ImagePlusIcon from "./ImagePlusIcon.vue"
 
 export {
     AddIcon,
@@ -22,4 +25,7 @@ export {
     FilterIcon,
     CheckIcon,
     LoadingIcon,
+    VuePasswordIcon,
+    HiddenPasswordIcon,
+    ImagePlusIcon,
 }

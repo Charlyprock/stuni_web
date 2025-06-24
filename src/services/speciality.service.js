@@ -1,9 +1,10 @@
 import Axios from './axios.service'
 
-let test = () => {
-    return Axios.get('/test/')
+let get_speciality = (id=null) => {
+    let url = '/specialitys/' + (id ? id : '')
+    return Axios.get(url)
 }
 
 export const SpecialityService = {
-    test
+    get_speciality,
 }
