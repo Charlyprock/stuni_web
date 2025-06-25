@@ -141,60 +141,30 @@
 				<legend class="fieldset-legend">Information inscription <span class="text-error text-lg">*</span></legend>
 
 				<!-- Niveau -->
-                <div class="dropdown dropdown-start w-full">
-                    <button tabindex="0" role="button" class="w-full flex items-center justify-between btn btn-outline border-base-300 p-(--padding-box) text-sm">
-                        <p class="text-nowrap overflow-hidden text-ellipsis max-w-[80%]">Niveau ({{ select.level?.name }})</p>
-                        <LoadingIcon v-if="loading.level" class="size-(--icon-size)" />
-						<DirectionIcon v-else class="size-(--icon-size)" />
-                    </button>
-
-                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 mt-1 max-h-[300px] flex-nowrap overflow-y-auto p-2 shadow-xl border border-base-300">
-                        <li @click="select_level(level)" v-for="level in levels" :key="level.id" class="max-w-full overflow-hidden rounded-field">
-							<div class="flex items-center gap-2 w-full">
-								<CheckIcon :class="[select.level.id != level.id ? 'text-transparent': '', 'size-(--icon-size)']" />
-								<a class="text-nowrap overflow-hidden text-ellipsis flex-1">{{ level.name }}</a>
-							</div>
-						</li>
-                    </ul>
-                </div>
+				<SelectFilter 
+					:values="levels" 
+					name="Niveau"
+					:loading="loading.level"
+					@select-value="select_level"
+				/>
 				<p v-for="error in errors['level']" class="text-error text-start">{{ error }}</p>
 
 				<!-- specialité -->
-                <div class="dropdown dropdown-start w-full">
-                    <button :disabled="specialitys.length < 1" tabindex="0" role="button" class="w-full flex items-center justify-between btn btn-outline border-base-300 p-(--padding-box) text-sm">
-                        <p class="text-nowrap overflow-hidden text-ellipsis max-w-[80%]">Spécialité ({{ select.speciality?.name }})</p>
-                        <LoadingIcon v-if="loading.speciality" class="size-(--icon-size)" />
-						<DirectionIcon v-else class="size-(--icon-size)" />
-                    </button>
-
-                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 mt-1 max-h-[300px] flex-nowrap overflow-y-auto p-2 shadow-xl border border-base-300">
-                        <li @click="select_speciality(speciality)" v-for="speciality in specialitys" :key="speciality.id" class="max-w-full overflow-hidden rounded-field">
-							<div class="flex items-center gap-2 w-full">
-								<CheckIcon :class="[select.speciality.id != speciality.id ? 'text-transparent': '', 'size-(--icon-size)']" />
-								<a class="text-nowrap overflow-hidden text-ellipsis flex-1">{{ speciality.name }}</a>
-							</div>
-						</li>
-                    </ul>
-                </div>
+				<SelectFilter 
+					:values="specialitys" 
+					name="Spécialité"
+					:loading="loading.speciality"
+					@select-value="select_speciality"
+				/>
 				<p v-for="error in errors['speciality']" class="text-error text-start">{{ error }}</p>
 
 				<!-- classe -->
-                <div class="dropdown dropdown-start w-full">
-                    <button :disabled="classes.length < 1" tabindex="0" role="button" class="w-full flex items-center justify-between btn btn-outline border-base-300 p-(--padding-box) text-sm">
-                        <p class="text-nowrap overflow-hidden text-ellipsis max-w-[80%]">Classe ({{ select.classe?.abbreviation }})</p>
-                        <LoadingIcon v-if="loading.classe" class="size-(--icon-size)" />
-						<DirectionIcon v-else class="size-(--icon-size)" />
-                    </button>
-
-                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 mt-1 max-h-[300px] flex-nowrap overflow-y-auto p-2 shadow-xl border border-base-300">
-                        <li @click="select_classe(classe)" v-for="classe in classes" :key="classe.id" class="max-w-full overflow-hidden rounded-field">
-							<div class="flex items-center gap-2 w-full">
-								<CheckIcon :class="[select.classe.id != classe.id ? 'text-transparent': '', 'size-(--icon-size)']" />
-								<a class="text-nowrap overflow-hidden text-ellipsis flex-1">{{ classe.abbreviation }}</a>
-							</div>
-						</li>
-                    </ul>
-                </div>
+				<SelectFilter 
+					:values="classes" 
+					name="Classe"
+					:loading="loading.classe"
+					@select-value="select_classe"
+				/>
 				<p v-for="error in errors['classe']" class="text-error text-start">{{ error }}</p>
 
 				<label class="label">Année acardemic</label>
@@ -223,6 +193,7 @@ import {
 	HiddenPasswordIcon, VuePasswordIcon,
 } from '@/components/icons';
 import ImageUploader from '@/components/ImageUploaderComponent.vue';
+import SelectFilter from '@/components/SelectFilterComponent.vue';
 import { LevelService, SpecialityService, StudentService } from '@/services';
 import { NotificationUtil, DateUtil, ValidatedUtil } from '@/utils';
 import { onMounted, ref, watch } from 'vue';
