@@ -1,6 +1,6 @@
 <template>
     <div class="dropdown dropdown-start w-full">
-        <button tabindex="0" role="button" class="w-full flex items-center justify-between btn btn-outline border-base-300 p-(--padding-box) text-sm">
+        <button :disabled="props.values.length < 1" tabindex="0" role="button" class="w-full flex items-center justify-between btn btn-outline border-base-300 p-(--padding-box) text-sm">
             <p class="text-nowrap overflow-hidden text-ellipsis max-w-[80%]">{{ props.name }} ({{ select?.name }})</p>
             <LoadingIcon v-if="props.loading" class="size-(--icon-size)" />
             <DirectionIcon v-else class="size-(--icon-size)" />

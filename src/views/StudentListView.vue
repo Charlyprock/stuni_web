@@ -8,7 +8,7 @@
 			<h1 class="text-xl text-nowrap">Liste des Etudiants</h1>
 
 			<div class="flex gap-3 items-center">
-				<button class="btn btn-neutral btn-sm text-nowrap">
+				<button data-tip="Nouveaux Etudiant" class="btn btn-neutral tooltip tooltip-left btn-sm text-nowrap">
 					<RouterLink :to="{name: 'student-add'}">
 						<AddIcon class="size-(--icon-size)" />
 					</RouterLink>
@@ -37,65 +37,28 @@
 				</button>
 
 				<!-- niveau -->
-                <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="flex items-center space-x-2 m-1 cursor-pointer hover:bg-base-300 p-(--padding-box) rounded-field text-sm duration-300">
-                        <p>Niveau (Niveau 1)</p>
-                        <DirectionIcon class="size-4" />
-                    </div>
-                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-xl border border-base-300">
-                        <li><a>Niveau 1</a></li>
-                        <li><a>Niveau 2</a></li>
-                        <li><a>Niveau 3</a></li>
-                        <li><a>Niveau 4</a></li>
-                        <li><a>Niveau 5</a></li>
-                    </ul>
-                </div>
+				<SelectFilter 
+					:values="levels" 
+					name="Niveau"
+					:loading="loading.level"
+					@select-value="select_level"
+				/>
 
-				<!-- departement -->
-                <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="flex items-center space-x-2 m-1 cursor-pointer hover:bg-base-300 p-(--padding-box) rounded-field text-sm duration-300">
-                        <p>Departement (GI)</p>
-                        <DirectionIcon class="size-4" />
-                    </div>
-                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-xl border border-base-300">
-                        <li><a>Departement 1</a></li>
-                        <li><a>Departement 2</a></li>
-                        <li><a>Departement 3</a></li>
-                        <li><a>Departement 4</a></li>
-                        <li><a>Departement 5</a></li>
-                    </ul>
-                </div>
-
-				<!-- filier -->
-                <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="flex items-center space-x-2 m-1 cursor-pointer hover:bg-base-300 p-(--padding-box) rounded-field text-sm duration-300">
-                        <p>Filier (GL)</p>
-                        <DirectionIcon class="size-4" />
-                    </div>
-                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-xl border border-base-300">
-                        <li><a>Filier 1</a></li>
-                        <li><a>Filier 2</a></li>
-                        <li><a>Filier 3</a></li>
-                        <li><a>Filier 4</a></li>
-                        <li><a>Filier 5</a></li>
-                    </ul>
-                </div>
+				<!-- specialité -->
+				<SelectFilter 
+					:values="specialitys" 
+					name="Spécialité"
+					:loading="loading.speciality"
+					@select-value="select_speciality"
+				/>
 
 				<!-- classe -->
-                <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="flex items-center space-x-2 m-1 cursor-pointer hover:bg-base-300 p-(--padding-box) rounded-field text-sm duration-300">
-                        <p>classe (GL-C)</p>
-                        <DirectionIcon class="size-(--icon-size)" />
-                    </div>
-                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 max-h-[300px] flex-nowrap overflow-y-auto p-2 shadow-xl border border-base-300">
-                        <li v-for="i in 10" class="text-nowrap overflow-hidden text-ellipsis">
-							<div class=" flex items-center gap-2">
-								<CheckIcon class="size-(--icon-size)" />
-								<a>classe i</a>
-							</div>
-						</li>
-                    </ul>
-                </div>
+				<SelectFilter 
+					:values="classes" 
+					name="Classe"
+					:loading="loading.classe"
+					@select-value="select_classe"
+				/>
 			</div>
 
 			<!-- list -->
@@ -119,8 +82,51 @@
 						</tr>
 						</thead>
 						<tbody>
-						<!-- row 1 -->
-						<tr>
+						<!-- row -->
+
+						<!-- simulation -->
+						<tr v-if="is_loading_student">
+							<th>
+								<div class=" size-6 skeleton rounded-md"></div>
+							</th>
+
+							<td>
+								<div class="flex items-center gap-3">
+									<div class="mask mask-squircle size-12 skeleton"></div>
+									<div class=" space-y-2">
+										<div class="h-2 w-24 skeleton"></div>
+										<div class="h-2 w-14 skeleton"></div>
+									</div>
+								</div>
+							</td>
+
+							<td>
+								<div class=" space-y-2">
+									<div class="h-2 w-24 skeleton"></div>
+									<div class="h-2 w-14 skeleton"></div>
+								</div>
+							</td>
+
+							<td>
+								<div class=" space-y-2">
+									<div class="h-2 w-24 skeleton"></div>
+									<div class="h-2 w-14 skeleton"></div>
+								</div>
+							</td>
+
+							<td>
+								<div class=" space-y-2">
+									<div class="h-2 w-24 skeleton"></div>
+									<div class="h-2 w-14 skeleton"></div>
+								</div>
+							</td>
+
+							<th>
+								<div class="h-4 w-8 skeleton"></div>
+							</th>
+						</tr>
+
+						<tr v-for="student in students" :key="student.id">
 							<th>
 								<label>
 									<input type="checkbox" class="checkbox" />
@@ -129,37 +135,39 @@
 
 							<td>
 								<div class="flex items-center gap-3">
-									<div class="avatar indicator tooltip tooltip-right" data-tip="Délégué">
-										<span class="indicator-item status status-accent status-lg -translate-0.5"></span>
+									<div class="avatar indicator" :class="student.enrollments.is_delegate ? 'tooltip tooltip-right' : ''" data-tip="Délégué">
+										<span v-if="student.enrollments.is_delegate" class="indicator-item status status-accent status-lg -translate-0.5 outline-2 outline-base-100"></span>
 										<div class="mask mask-squircle h-12 w-12">
 											<img
 											src="https://img.daisyui.com/images/profile/demo/2@94.webp"
 											alt="Avatar Tailwind CSS Component" />
 										</div>
 									</div>
-									<div>
-										<div class="font-bold">Hart Hagerty</div>
-										<div class="text-sm opacity-50">#SDJFIESLIE</div>
+									<div :data-tip="`${student.user?.last_name} ${student.user?.first_name}`" class="tooltip tooltip-right">
+										<div class="tooltip tooltip-right font-bold text-nowrap text-ellipsis max-w-[90%] overflow-hidden">
+											{{ `${student.user?.last_name} ${student.user?.first_name}` }}
+										</div>
+										<div class="text-sm opacity-50 uppercase">#{{ student.user?.code }}</div>
 									</div>
 								</div>
 							</td>
 
 							<td>
-								Admin@gmail.com
+								{{ student.user?.email ?? '---' }}
 								<br />
-								<span class="badge badge-ghost badge-sm">671 88 47 17</span>
+								<span class="badge badge-ghost badge-sm">{{ student.user?.phone ?? '---' }}</span>
 							</td>
 
 							<td>
-								20/12/2020
+								{{ student.birth_date ?? '---' }}
 								<br />
-								<div class="text-sm opacity-50">Douala</div>
+								<div class="text-sm opacity-50">{{ student.birth_place ?? '---' }}</div>
 							</td>
 
 							<td>
-								Cameroun
+								{{ student.user?.nationnality ?? '---' }}
 								<br />
-								<div class="text-sm opacity-50">Français</div>
+								<div class="text-sm opacity-50">{{ student.user?.address ?? '---' }}</div>
 							</td>
 
 							<th>
@@ -185,102 +193,7 @@
 								</div>
 							</th>
 						</tr>
-						<!-- row 2 -->
-						<tr>
-							<th>
-							<label>
-								<input type="checkbox" class="checkbox" />
-							</label>
-							</th>
-							<td>
-							<div class="flex items-center gap-3">
-								<div class="avatar">
-								<div class="mask mask-squircle h-12 w-12">
-									<img
-									src="https://img.daisyui.com/images/profile/demo/3@94.webp"
-									alt="Avatar Tailwind CSS Component" />
-								</div>
-								</div>
-								<div>
-								<div class="font-bold">Brice Swyre</div>
-								<div class="text-sm opacity-50">China</div>
-								</div>
-							</div>
-							</td>
-							<td>
-							Carroll Group
-							<br />
-							<span class="badge badge-ghost badge-sm">Tax Accountant</span>
-							</td>
-							<td>Red</td>
-							<th>
-							<button class="btn btn-ghost btn-xs">details</button>
-							</th>
-						</tr>
-						<!-- row 3 -->
-						<tr>
-							<th>
-							<label>
-								<input type="checkbox" class="checkbox" />
-							</label>
-							</th>
-							<td>
-							<div class="flex items-center gap-3">
-								<div class="avatar">
-								<div class="mask mask-squircle h-12 w-12">
-									<img
-									src="https://img.daisyui.com/images/profile/demo/4@94.webp"
-									alt="Avatar Tailwind CSS Component" />
-								</div>
-								</div>
-								<div>
-								<div class="font-bold">Marjy Ferencz</div>
-								<div class="text-sm opacity-50">Russia</div>
-								</div>
-							</div>
-							</td>
-							<td>
-							Rowe-Schoen
-							<br />
-							<span class="badge badge-ghost badge-sm">Office Assistant I</span>
-							</td>
-							<td>Crimson</td>
-							<th>
-							<button class="btn btn-ghost btn-xs">details</button>
-							</th>
-						</tr>
-						<!-- row 4 -->
-						<tr>
-							<th>
-							<label>
-								<input type="checkbox" class="checkbox" />
-							</label>
-							</th>
-							<td>
-							<div class="flex items-center gap-3">
-								<div class="avatar">
-								<div class="mask mask-squircle h-12 w-12">
-									<img
-									src="https://img.daisyui.com/images/profile/demo/5@94.webp"
-									alt="Avatar Tailwind CSS Component" />
-								</div>
-								</div>
-								<div>
-								<div class="font-bold">Yancy Tear</div>
-								<div class="text-sm opacity-50">Brazil</div>
-								</div>
-							</div>
-							</td>
-							<td>
-							Wyman-Ledner
-							<br />
-							<span class="badge badge-ghost badge-sm">Community Outreach Specialist</span>
-							</td>
-							<td>Indigo</td>
-							<th>
-							<button class="btn btn-ghost btn-xs">details</button>
-							</th>
-						</tr>
+
 						</tbody>
 						<!-- foot -->
 						<tfoot>
@@ -299,24 +212,7 @@
 
 			<!-- le parginate -->
 			<div class="flex justify-center">
-				<div class="flex justify-center items-center">
-
-					<button class="btn btn-sm p-2 mr-2 rounded-full">
-						<DirectionIcon class="size-(--icon-size) rotate-90"/>
-					</button>
-
-					<div class="py-1 px-2 bg-base-200 rounded-box flex gap-1">
-						<button class="btn btn-sm btn-primary">1</button>
-						<button class="btn btn-sm">2</button>
-						<button class="btn btn-sm btn-disabled">...</button>
-						<button class="btn btn-sm">99</button>
-						<button class="btn btn-sm">100</button>
-					</div>
-
-					<button class="btn btn-sm p-2 ml-2 rounded-full">
-						<DirectionIcon class="size-(--icon-size) -rotate-90"/>
-					</button>
-				</div>
+				<Pargination :data="paginate" @new="new_page" />
 			</div>
 		</div>
 	</div>
@@ -327,4 +223,62 @@ import {
 	AddIcon, SearchIcon, MenuIcon, EditIcon, DeleteIcon,
 	DirectionIcon, FilterIcon, CheckIcon,
 } from '@/components/icons';
+import SelectFilter from '@/components/SelectFilterComponent.vue';
+import Pargination from '@/components/ParginationComponent.vue';
+import { useFilters } from '@/composables/useFiltersComposable'
+import { usePargination } from '@/composables/useParginationComposable';
+import { StudentService } from '@/services';
+import { onMounted, ref, watch } from 'vue';
+
+const {
+  form,
+  select,
+  levels,
+  specialitys,
+  classes,
+  loading,
+  select_level,
+  select_speciality,
+  select_classe,
+} = useFilters({ autoLoad: true, defaultSelectFirst: true })
+
+const {
+	new_page,
+	refresch_paginate,
+	paginate,
+	
+} = usePargination()
+
+const students = ref([])
+const is_loading_student = ref(true)
+
+watch(()=> select.value.classe, (classe)=> {
+	const options = {
+		year: '2024/2025',
+		level: select.value.level?.id,
+		speciality: select.value.level?.id,
+		department: null,
+		classe: select.value.level?.id,
+		search: null
+	}
+	getStudents(options)
+})
+
+watch(()=> paginate.value, (pag)=> {
+	students.value = pag?.data?.results
+}, {deep: true})
+
+function getStudents(options={
+    year: null,
+    level: null,
+    speciality: null,
+    department: null,
+    classe: null,
+    search: null
+}){
+	StudentService.getStudents(options).then((res) => {
+		// students.value = res.data.results
+		refresch_paginate(res.data)
+	}).finally(()=> is_loading_student.value = false)
+}
 </script>
