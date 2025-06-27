@@ -155,12 +155,17 @@
                 <!-- l'année -->
                 <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="flex items-center space-x-2 m-1 cursor-pointer hover:bg-base-300 p-(--padding-box) rounded-field text-sm duration-300">
-                        <p>2024/2025</p>
+                        <p>{{ currentYear }}</p>
                         <DirectionIcon class="size-4" />
                     </div>
+
                     <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-xl border border-base-300">
-                        <li><a>Item 1</a></li>
-                        <li><a>Item 2</a></li>
+                        <li v-for="year in availableYears"
+                            @click="setYear(year)"
+                            :disabled="isLoading"
+                        >
+                            <a>{{ year }}</a>
+                        </li>
                     </ul>
                 </div>
 
@@ -227,7 +232,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, computed, ref, watch } from 'vue'
 import MatriculeIcon from '@/components/icons/MatriculeIcon.vue';
 import DirectionIcon from '@/components/icons/DirectionIcon.vue';
 import SearchIcon from '@/components/icons/SearchIcon.vue';
@@ -235,6 +240,11 @@ import StudentIcon from '@/components/icons/StudentIcon.vue';
 import TeacherIcon from '@/components/icons/TeacherIcon.vue';
 import ListIcon from '@/components/icons/ListIcon.vue';
 import AddIcon from '@/components/icons/AddIcon.vue';
+
+import { useUnivercityYear } from '@/composables/useYearComposable'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const sidebarCollapsed = ref(false)
 
@@ -257,11 +267,26 @@ function handleSlashKey(event) {
 
 onMounted(() => {
     window.addEventListener('keydown', handleSlashKey);
+    initFromUrl()
 });
 
 onUnmounted(() => {
     window.removeEventListener('keydown', handleSlashKey);
 });
+
+const { currentYear, availableYears, setYear, isLoading, initFromUrl } = useUnivercityYear()
+
+watch(
+  () => route.query.year,
+  async (newYear) => {
+    if (newYear && newYear !== currentYear.value) {
+      // Mettre à jour le store sans re-synchroniser l'URL (éviter la boucle)
+      const { useUnivercityYearStore } = await import('@/stores/yearStore')
+      const store = useUnivercityYearStore()
+      store.currentYear = newYear
+    }
+  }
+)
 
 </script>
 

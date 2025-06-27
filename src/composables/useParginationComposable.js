@@ -16,11 +16,11 @@ export function usePargination(){
     }
 
     function refresch_paginate(data){
-        paginate.value.count = data.count
-        paginate.value.current_page = data.current_page
-        paginate.value.total_pages = data.total_pages
-        paginate.value.next = data.next
-        paginate.value.previous = data.previous
+        paginate.value.count = data?.count
+        paginate.value.current_page = data?.current_page
+        paginate.value.total_pages = data?.total_pages
+        paginate.value.next = data?.next
+        paginate.value.previous = data?.previous
         paginate.value.data = data
     }
 

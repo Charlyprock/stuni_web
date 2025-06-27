@@ -14,15 +14,19 @@
 					</RouterLink>
 				</button>
 
-				<label class="input validator w-full">
+				<label class="input w-full">
 					<SearchIcon :class-props="'h-[1em] opacity-50'" />
 					<input
 						type="text"
-						required
 						placeholder="Recherche"
 						id="input_search"
+						v-model="search.q"
 					/>
 				</label>
+
+				<button @click="refresch_student" :disabled="!search.q" class="btn btn-accent tooltip tooltip-left" data-tip="Rafraichir">
+					<RefreschIcon class="size-(--icon-size)"/>
+				</button>
 			</div>
 		</header>
 
@@ -41,6 +45,7 @@
 					:values="levels" 
 					name="Niveau"
 					:loading="loading.level"
+					:default-select="select.level"
 					@select-value="select_level"
 				/>
 
@@ -49,6 +54,7 @@
 					:values="specialitys" 
 					name="Spécialité"
 					:loading="loading.speciality"
+					:default-select="select.speciality"
 					@select-value="select_speciality"
 				/>
 
@@ -57,8 +63,15 @@
 					:values="classes" 
 					name="Classe"
 					:loading="loading.classe"
+					:default-select="select.classe"
 					@select-value="select_classe"
 				/>
+			</div>
+
+			<div>
+				<button @click="delete_all" :disabled="selectedItems.length <= 0" class="btn btn-error tooltip tooltip-right tooltip-error" data-tip="Supprimer les éléments cochés.">
+					<DeleteIcon class="size-(--icon-size)"/>
+                </button>
 			</div>
 
 			<!-- list -->
@@ -71,7 +84,11 @@
 						<tr>
 							<th>
 							<label>
-								<input type="checkbox" class="checkbox" />
+								<input type="checkbox" class="checkbox" 
+									:checked="isAllSelected"
+									:indeterminate="isIndeterminate"
+									@change="toggleAll" 
+								/>
 							</label>
 							</th>
 							<th>Nom</th>
@@ -129,7 +146,10 @@
 						<tr v-for="student in students" :key="student.id">
 							<th>
 								<label>
-									<input type="checkbox" class="checkbox" />
+									<input type="checkbox" class="checkbox" 
+										:checked="isSelected(student.id)" 
+										@change="toggleItem(student.id)"
+									/>
 								</label>
 							</th>
 
@@ -221,14 +241,24 @@
 <script setup>
 import { 
 	AddIcon, SearchIcon, MenuIcon, EditIcon, DeleteIcon,
-	DirectionIcon, FilterIcon, CheckIcon,
+	RefreschIcon, FilterIcon, CheckIcon,
 } from '@/components/icons';
 import SelectFilter from '@/components/SelectFilterComponent.vue';
 import Pargination from '@/components/ParginationComponent.vue';
 import { useFilters } from '@/composables/useFiltersComposable'
 import { usePargination } from '@/composables/useParginationComposable';
+import { useCheckbox } from '@/composables/useCheckboxComponent';
+import { useUnivercityYearStore } from '@/stores/yearStore';
 import { StudentService } from '@/services';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
+import { NotificationUtil } from '@/utils';
+
+const Notification = NotificationUtil.notificationsUtil()
+
+const students = ref([])
+const search = ref({
+	q: null
+})
 
 const {
   form,
@@ -240,28 +270,37 @@ const {
   select_level,
   select_speciality,
   select_classe,
-} = useFilters({ autoLoad: true, defaultSelectFirst: true })
+} = useFilters({ defaultSelectFirst: true })
 
 const {
 	new_page,
 	refresch_paginate,
 	paginate,
-	
 } = usePargination()
 
-const students = ref([])
-const is_loading_student = ref(true)
+const {
+	isAllSelected,
+	isIndeterminate,
+	selectedItems,
+	isSelected,
+	toggleAll,
+	toggleItem
+} = useCheckbox(students)
 
-watch(()=> select.value.classe, (classe)=> {
-	const options = {
-		year: '2024/2025',
+const yearStore = useUnivercityYearStore()
+
+const is_loading_student = ref(false)
+
+watch(
+	[() => select.value.classe, () => yearStore.currentYear, () => search.value.q], 
+	([classe, year, q])=> {
+	getStudents({
 		level: select.value.level?.id,
-		speciality: select.value.level?.id,
+		speciality: select.value.speciality?.id,
 		department: null,
-		classe: select.value.level?.id,
-		search: null
-	}
-	getStudents(options)
+		classe: select.value.classe?.id,
+		search: q
+	})
 })
 
 watch(()=> paginate.value, (pag)=> {
@@ -269,16 +308,40 @@ watch(()=> paginate.value, (pag)=> {
 }, {deep: true})
 
 function getStudents(options={
-    year: null,
-    level: null,
-    speciality: null,
-    department: null,
-    classe: null,
-    search: null
+	level: select.value.level?.id,
+	speciality: select.value.speciality?.id,
+	department: null,
+	classe: select.value.classe?.id,
+	search: null
 }){
+	
+	is_loading_student.value = true
 	StudentService.getStudents(options).then((res) => {
-		// students.value = res.data.results
 		refresch_paginate(res.data)
 	}).finally(()=> is_loading_student.value = false)
 }
+
+function search_student(){
+	setTimeout(() => {
+		getStudents({
+			search: search.value.q
+		})
+	}, 500);
+}
+
+function refresch_student(){
+	search.value.q = null
+}
+
+function delete_all(){
+	const form = {ids: selectedItems.value}
+	StudentService.deleteStudentsIDS(form).then((res)=>{
+		students.value = students.value.filter(
+			stud => !res.data.deleted.includes(stud.id)
+		)
+		selectedItems.value = []
+		Notification.success("Suppréssion réussir.")
+	})
+}
+
 </script>

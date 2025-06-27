@@ -12,6 +12,7 @@ import LoadingIcon from "./LoadingIcon.vue"
 import VuePasswordIcon from "./VuePasswordIcon.vue"
 import HiddenPasswordIcon from "./HiddenPasswordIcon.vue"
 import ImagePlusIcon from "./ImagePlusIcon.vue"
+import RefreschIcon from "./RefreschIcon.vue"
 
 export {
     AddIcon,
@@ -28,4 +29,5 @@ export {
     VuePasswordIcon,
     HiddenPasswordIcon,
     ImagePlusIcon,
+    RefreschIcon,
 }
