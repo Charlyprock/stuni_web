@@ -69,7 +69,7 @@
 			</div>
 
 			<div>
-				<button @click="delete_all" :disabled="selectedItems.length <= 0" class="btn btn-error tooltip tooltip-right tooltip-error" data-tip="Supprimer les éléments cochés.">
+				<button @click="showDeleteModalF()" :disabled="selectedItems.length <= 0" class="btn btn-error tooltip tooltip-right tooltip-error" data-tip="Supprimer les éléments cochés.">
 					<DeleteIcon class="size-(--icon-size)"/>
                 </button>
 			</div>
@@ -204,7 +204,7 @@
 											</button>
 										</li>
 										<li>
-											<button class="btn btn-ghostj btn-soft btn-error btn-sm text-sm justify-start">
+											<button @click="showDeleteModalF(student)" class="btn btn-ghostj btn-soft btn-error btn-sm text-sm justify-start">
 												<DeleteIcon class="size-(--icon-size) kbd border border-error p-[2px] bg-error/10" />
 												Suprimer
 											</button>
@@ -235,6 +235,17 @@
 				<Pargination :data="paginate" @new="new_page" />
 			</div>
 		</div>
+					
+		<Modal
+			v-model="showDeleteModal"
+			title="Supprimer l'élément"
+			message="Cette action est irréversible. Êtes-vous sûr de vouloir supprimer cet élément ?"
+			confirm-text="Supprimer"
+			cancel-text="Conserver"
+			confirm-button-type="danger"
+			:loading="deleteLoading"
+			@confirm="handleDelete"
+		/>
 	</div>
 </template>
 
@@ -244,6 +255,7 @@ import {
 	RefreschIcon, FilterIcon, CheckIcon,
 } from '@/components/icons';
 import SelectFilter from '@/components/SelectFilterComponent.vue';
+import Modal from '@/components/ModalComponent.vue'
 import Pargination from '@/components/ParginationComponent.vue';
 import { useFilters } from '@/composables/useFiltersComposable'
 import { usePargination } from '@/composables/useParginationComposable';
@@ -290,6 +302,8 @@ const {
 const yearStore = useUnivercityYearStore()
 
 const is_loading_student = ref(false)
+const showDeleteModal = ref(false)
+const deleteLoading = ref(false)
 
 watch(
 	[() => select.value.classe, () => yearStore.currentYear, () => search.value.q], 
@@ -321,16 +335,21 @@ function getStudents(options={
 	}).finally(()=> is_loading_student.value = false)
 }
 
-function search_student(){
-	setTimeout(() => {
-		getStudents({
-			search: search.value.q
-		})
-	}, 500);
-}
-
 function refresch_student(){
 	search.value.q = null
+}
+
+function delete_student(id){
+	StudentService.deleteStudent(id).then((res)=>{
+		students.value = students.value.filter(
+			stud => stud.id != id
+		)
+		Notification.success("Suppréssion réussir.")
+	}).catch((error) => Notification.error("Une erreur innatendus s'est produit, veuillez réessayer."))
+	.finally(() => {
+		deleteLoading.value = false
+		closeDeleteModalF()
+	})
 }
 
 function delete_all(){
@@ -341,7 +360,31 @@ function delete_all(){
 		)
 		selectedItems.value = []
 		Notification.success("Suppréssion réussir.")
+	}).catch((error) => Notification.error("Une erreur innatendus s'est produit, veuillez réessayer."))
+	.finally(() => {
+		deleteLoading.value = false
+		closeDeleteModalF()
 	})
+}
+
+const student_click = ref(null)
+function showDeleteModalF(student=null){
+	showDeleteModal.value = true
+	student_click.value = student
+}
+
+function closeDeleteModalF(){
+	showDeleteModal.value = false
+	student_click.value = null
+}
+
+function handleDelete(){
+	deleteLoading.value = true
+	if (student_click.value) {
+		delete_student(student_click.value.id)
+	} else {
+		delete_all()
+	}
 }
 
 </script>

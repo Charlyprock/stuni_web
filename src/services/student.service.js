@@ -28,13 +28,18 @@ let getStudents = (option = {
 }
 
 let deleteStudentsIDS = (formData) => {
-    return Axios.delete("/students-ids-delete/", {
+    return Axios.delete("/students/students-ids-delete/", {
         data: formData
     })
+}
+
+let deleteStudent = (id) => {
+    return Axios.delete(`/students/${id}/`)
 }
 
 export const StudentService = {
     setStudent,
     getStudents,
     deleteStudentsIDS,
+    deleteStudent,
 }
