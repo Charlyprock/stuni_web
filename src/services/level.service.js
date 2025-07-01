@@ -25,9 +25,16 @@ let set_specialitys = (id, specialitys) => {
     return Axios.post(`/levels/${id}/specialitys/`, specialitys)
 }
 
+let delete_specialitys = (id, ids) => {
+    return Axios.delete(`/levels/${id}/specialitys/`, {
+        data: ids
+    })
+}
+
 export const LevelService = {
     get_level,
     set_level,
     update_level,
     set_specialitys,
+    delete_specialitys,
 }

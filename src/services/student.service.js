@@ -12,7 +12,6 @@ let getStudents = (option = {
     classe: null,
     search: null
 }) => {
-    console.log("sdfd", option)
     // /students/?year=2024/2025&level=1&speciality=1&department=1&classe=1 &search=charly
     const yearStore = useUnivercityYearStore()
     return Axios.get("/students/", {
