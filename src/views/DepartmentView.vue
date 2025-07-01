@@ -8,7 +8,7 @@
             <h1 class="text-xl text-nowrap">Liste des Départements</h1>
 
             <div class="flex gap-3 items-center">
-                <button @click="showLevelModalF()" data-tip="Nouveaux Niveau" class="btn btn-neutral tooltip tooltip-left btn-sm text-nowrap">
+                <button @click="showDepartmentModalF()" data-tip="Nouveaux Département" class="btn btn-neutral tooltip tooltip-left btn-sm text-nowrap">
                     <AddIcon class="size-(--icon-size)" />
                 </button>
 
@@ -17,7 +17,7 @@
                     <input type="text" placeholder="Recherche" id="input_search" v-model="search.q" />
                 </label>
 
-                <button @click="refresch_level" :disabled="!search.q" class="btn btn-accent tooltip tooltip-left"
+                <button @click="refresch_department" :disabled="!search.q" class="btn btn-accent tooltip tooltip-left"
                     data-tip="Rafraichir">
                     <RefreschIcon class="size-(--icon-size)" />
                 </button>
@@ -34,27 +34,29 @@
                             <th></th>
                             <th>Nom</th>
                             <th>Abreviation</th>
+                            <th>Admin</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- row 1 -->
-                        <tr v-for="(level, i) in levels" :key="level.id">
+                        <tr v-for="(department, i) in departments" :key="department.id">
                             <th>{{ i + 1 }}</th>
-                            <td>{{ level.name }}</td>
-                            <td>{{ level.abbreviation }}</td>
+                            <td>{{ department.name }}</td>
+                            <td>{{ department.abbreviation }}</td>
+                            <td>
+                                <div>
+                                    <p>{{ department.admin_display?.username ?? "---" }}</p>
+                                    <p class="opacity-60">{{ department.admin_display?.code ?? "---" }}</p>
+                                </div>
+                            </td>
                             <td>
                                 <div class="flex gap-3">
-                                    <button @click="showLevelModalF(level)" data-tip="Editer" class="btn btn-accent btn-sm tooltip tooltip-top">
+                                    <button @click="showDepartmentModalF(department)" data-tip="Editer" class="btn btn-accent btn-sm tooltip tooltip-top">
                                         <EditIcon class="size-(--icon-size)" />
                                     </button>
 
-                                    <button @click="showSpecialityModalF(level)" class="btn btn-primary btn-sm btn-soft">
-                                        <AddIcon class="size-(--icon-size)" />
-                                        Add Spécialités
-                                    </button>
-
-                                    <button @click="showAllSpecialityModalF(level)" data-tip="Détail" class="btn btn-primary btn-sm tooltip tooltip-top">
+                                    <button @click="showAllSpecialityModalF(department)" data-tip="Détail" class="btn btn-primary btn-sm tooltip tooltip-top">
                                         <DetailIcon class="size-(--icon-size)" />
                                     </button>
                                 </div>
@@ -65,94 +67,60 @@
             </div>
         </div>
 
-        <!-- Modal pour l'ajout et l'edit des levels -->
+        <!-- Modal pour l'ajout et l'edit d'un département -->
         <Modal 
-            v-model="showLevelModal" 
-            title="Nivaux" 
+            v-model="showDepartmentModal" 
+            title="Département" 
             confirm-text="Sauvegarder" 
             cancel-text="Fermer"
             confirm-button-type="primary"
-            :loading="is_loading.set_level"
-            @confirm="handleSetLevel"
+            :loading="is_loading.set_department"
+            @confirm="handleSetDepartment"
             @cancel="resetForm"
         >
             <form class="space-y-4">
+                
+                <div>
+                    <SelectFilter
+                        :values="admins" 
+                        name="Admins: "
+                        :loading="is_loading.get_admins"
+                        defaulField="username"
+                        :defaultSelect="defaulAdminSelect"
+                        @select-value="select_admin"
+					/>
+                </div>
+
                 <label class="label">Nom</label>
                 <input v-model="form.name" type="text" required class="input w-full" placeholder="Nom" />
-                <p v-for="error in errors.set_level?.['name']" class="text-error text-start text-xs">{{ error }}</p>
+                <p v-for="error in errors.set_department?.['name']" class="text-error text-start text-xs">{{ error }}</p>
 
                 <label class="label">Abreviation</label>
                 <input v-model="form.abbreviation" type="text" required class="input w-full" placeholder="Abreviation" />
-                <p v-for="error in errors.set_level?.['abbreviation']" class="text-error text-start text-xs">{{ error }}</p>
+                <p v-for="error in errors.set_department?.['abbreviation']" class="text-error text-start text-xs">{{ error }}</p>
      
-            </form>
-        </Modal>
-
-        <!-- Modal d'ajout des specialitys -->
-        <Modal 
-            v-model="setSpecialitys.showModal" 
-            :title="`Niveax: ${setSpecialitys.level.name}`" 
-            confirm-text="Sauvegarder" 
-            cancel-text="Fermer"
-            confirm-button-type="primary"
-            :persistent="true"
-            :loading="is_loading.set_speciality"
-            @cancel="closeSpecialityModalF"
-            @confirm="submitSetSpeciality"
-        >
-            <form>
-
-                <div class="my-3 flex justify-between">
-                    <div class="max-w-[80%]">
-                        <SelectFilter
-                            :values="setSpecialitys.specialitys" 
-                            name="Spécialité"
-                            :loading="is_loading.get_speciality"
-                            @select-value="select_speciality"
-                        />
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="">
-                        <button type="button" @click="clearAllSetSpeciality" v-if="setSpecialitys.selectedItems.length > 0" class="btn btn-error">
-                            <DeleteIcon class="size-(--icon-size)" />
-                        </button>
-                    </div>
-
-                </div>
-                
-                <!-- Liste des éléments sélectionnés -->
-                <div class="w-full border border-base-300 rounded-field" v-if="setSpecialitys.selectedItems.length > 0">
-                    
-                    <div class="flex flex-wrap gap-3 p-3">
-                        <div v-for="item in setSpecialitys.selectedItems" :key="item.id" class="p-2 rounded-field bg-base-200/50 flex gap-1 text-base-content/70">
-                            <span>{{ item.name }}</span>
-                            <button type="button" @click="removeItemSpeciality(item.id)" class="btn btn-xs">
-                                <CloseIcon class="size-(--icon-size) p-[2px]" />
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-                <p v-for="error in errors.set_speciality?.['specialitys']" class="text-error text-start text-xs">{{ error }}</p>
             </form>
         </Modal>
 
         <!-- Modal d'afficharge des specialitys -->
         <Modal 
             v-model="allSpecialitys.showModal" 
-            :title="`Niveax: ${allSpecialitys.level.name}`" 
-            :confirm-text="`Supprimer (${selectedItems.length})`" 
+            :title="`Département: ${allSpecialitys.department.name}`" 
+            confirm-text="-" 
             cancel-text="Fermer"
             :persistent="true"
             confirm-button-type="primary"
-            @confirm="deleteAllSpecialitys"
         >
             <div>
                 <div class="space-y-2 border border-base-300 rounded-box p-2">
-                    <p><span class="font-semibold text-sm">Nom: </span>{{ allSpecialitys.level.name }}</p>
-                    <p><span class="font-semibold text-sm">Abreviation: </span>{{ allSpecialitys.level.abbreviation }}</p>
-                    <p><span class="font-semibold text-sm">Nombre de Spécialité: </span>{{ allSpecialitys.specialitys.length }}</p>
+                    <p><span class="font-semibold text-sm">Nom: </span>{{ allSpecialitys.department.name }}</p>
+                    <p><span class="font-semibold text-sm">Abreviation: </span>{{ allSpecialitys.department.abbreviation }}</p>
+                    
+                    <h1 class="text-lg text-base-content/50">Administrateur</h1>
+                    <p><span class="font-semibold text-sm">Pseudo: </span>{{ allSpecialitys.department.admin_display?.username ?? "---" }}</p>
+                    <p><span class="font-semibold text-sm">Code: </span>{{ allSpecialitys.department.admin_display?.code ?? "---" }}</p>
+
+                    <p><span class="font-semibold text-sm top-2">Nombre de Spécialité: </span>{{ allSpecialitys.specialitys.length }}</p>
                 </div>
 
                 <div v-if="is_loading.get_allSpeciality" class="flex justify-center my-5">
@@ -165,32 +133,13 @@
                 <!-- les specialitys -->
                 <div v-if="!is_loading.get_allSpeciality" class="space-y-2 p-2">
 
-                    <div class="flex gap-3">
-                        <label>
-                            <input type="checkbox" class="checkbox" 
-                                :checked="isAllSelected"
-                                :indeterminate="isIndeterminate"
-                                @change="toggleAll" 
-                            />
-                        </label>
+                    <h1 class="text-xl font-semibold text-base-content/50">Toutes les spécialités</h1>
 
-                        <h1 class="text-xl font-semibold text-base-content/50">Toutes les spécialités</h1>
-                    </div>
-                    <div v-for="speciality in allSpecialitys.specialitys" :key="speciality.id" class="border-b border-base-300 py-2 flex gap-3">
-                        <div>
-                            <label>
-                                <input type="checkbox" class="checkbox" 
-                                    :checked="isSelected(speciality.id)" 
-                                    @change="toggleItem(speciality.id)"
-                                />
-                            </label>
-                        </div>
-
-                        <div class="space-y-1">
-                            <p><span class="font-semibold text-sm">Nom: </span>{{ speciality.name }}</p>
-                            <p><span class="font-semibold text-sm">Abreviation: </span>{{ speciality.abbreviation }}</p>
-                        </div>
-                    
+                    <div v-for="speciality in allSpecialitys.specialitys" :key="speciality.id" class="border-b border-base-300 py-2 space-y-1">
+                        
+                        <p><span class="font-semibold text-sm">Nom: </span>{{ speciality.name }}</p>
+                        <p><span class="font-semibold text-sm">Abreviation: </span>{{ speciality.abbreviation }}</p>
+                
                     </div>
                 </div>
             </div>
@@ -200,249 +149,165 @@
 
 <script setup>
 import { 
-    AddIcon, SearchIcon, EditIcon, DeleteIcon,
-    RefreschIcon, CloseIcon, DetailIcon, LoadingIcon,
+    AddIcon, SearchIcon, EditIcon,
+    RefreschIcon, DetailIcon, LoadingIcon,
 } from '@/components/icons';
-import SelectFilter from '@/components/SelectFilterComponent.vue';
 import Modal from '@/components/ModalComponent.vue'
-import { LevelService, SpecialityService } from '@/services';
-import { onMounted, ref, watch, computed } from 'vue';
+import SelectFilter from '@/components/SelectFilterComponent.vue';
+import { DepartmentService, UserService } from '@/services';
+import { onMounted, ref, watch } from 'vue';
 import { NotificationUtil } from '@/utils';
-import { useCheckbox } from '@/composables/useCheckboxComposable';
 
 const Notification = NotificationUtil.notificationsUtil()
 
-const levels = ref([])
+const admins = ref([])
+const defaulAdminSelect = ref({})
+const departments = ref([])
 const form = ref({
     id: null,
     name: null,
-    abbreviation: null
+    abbreviation: null,
+    admin: null,
 })
 const is_loading = ref({
-    set_level: false,
-    set_speciality: false,
-    get_speciality: false,
+    set_department: false,
     get_allSpeciality: false,
+    get_admins: false
 })
 const errors = ref({
-    set_level: null,
-    set_speciality: null,
+    set_department: null,
 })
 
 const search = ref({
     q: null
 })
-const showLevelModal = ref(false)
+const showDepartmentModal = ref(false)
 
 onMounted(()=>{
-    get_level()
+    get_department()
 })
 
 watch(()=> search.value.q, (q)=> {
-    get_level(q)
+    get_department(q)
 })
 
-function refresch_level() {
+function refresch_department() {
     search.value.q = null
 }
 
-function get_level(search=null){
-    LevelService.get_level({search: search}).then((res)=> {
-        levels.value = res.data
+function get_department(search=null){
+    DepartmentService.get_department({search: search}).then((res)=> {
+        departments.value = res.data
     })
 }
 
-function update_level(){
-    LevelService.update_level(form.value).then((res)=>{
-        levels.value = levels.value.map(
-            level => level.id == res.data.id ? res.data : level
+function update_department(){
+    DepartmentService.update_department(form.value).then((res)=>{
+        departments.value = departments.value.map(
+            department => department.id == res.data.id ? res.data : department
         )
-        closeLevelModalF()
+        
         Notification.success("Modification réussir.")
     }).catch((error) => Notification.error("Une erreur innatendus s'est produit, veuillez réessayer."))
     .finally(() => {
-        is_loading.value.set_level = false
-        closeLevelModalF()
+        is_loading.value.set_department = false
+        closeDepartmentModalF()
     })
 }
 
-function set_level(){
-    LevelService.set_level(form.value).then((res)=>{
-        levels.value.unshift(res.data)
+function set_department(){
+    DepartmentService.set_department(form.value).then((res)=>{
+        departments.value.unshift(res.data)
         Notification.success("Ajout réussir.")
     }).catch((error) => {
         Notification.error("Une erreur innatendus s'est produit, veuillez réessayer.")
-        closeLevelModalF()
-        errors.value.set_level = error.response.data
+        closeDepartmentModalF()
+        errors.value.set_department = error.response.data
     })
     .finally(() => {
-        is_loading.value.set_level = false
+        is_loading.value.set_department = false
     })
+}
+
+function select_admin(admin){
+	form.value.admin = admin.id
 }
 
 function resetForm(){
     form.value = {
         id: null,
         name: null,
-        abbreviation: null
+        abbreviation: null,
+        admin: null,
     }
 
     errors.value = {
-        set_level: null,
-        set_speciality: null,
+        set_department: null,
     }
 }
 
-
-
-// function showDetailModalF(student=null){
-// 	showLevelModal.value = true
-// 	level_click.value = student
-// }
-
-function closeLevelModalF(){
-    showLevelModal.value = false
+function closeDepartmentModalF(){
+    showDepartmentModal.value = false
     resetForm()
 }
 
-function showLevelModalF(level=null){
-    showLevelModal.value = true
-    if (level) {
+function showDepartmentModalF(department=null){
+    showDepartmentModal.value = true
+    
+    if(admins.value.length < 1){
+        is_loading.value.get_admins = true
+        UserService.get_noStudent().then((res) => {
+            admins.value = res.data
+            is_loading.value.get_admins = false
+        })
+    }
+
+    if (department) {
+        defaulAdminSelect.value = department.admin_display
         form.value = {
-            id: level.id,
-            name: level.name,
-            abbreviation: level.abbreviation
+            id: department.id,
+            name: department.name,
+            abbreviation: department.abbreviation,
+            admin: department.admin
         }
     }
+
 }
 
-function handleSetLevel(){
-    is_loading.value.set_level = true
+function handleSetDepartment(){
+    if(!form.value.abbreviation || !form.value.name){
+        Notification.error("Veuillez remplir les champs nom et abreviation.")
+        return
+    }
+
+    is_loading.value.set_department = true
     if (form.value.id) {
-        update_level()
+        update_department()
     } else {
-        set_level()
+        set_department()
     }
 }
-
-
-
-// :::::::::::::::::::::::::::::::	GESTION DE L'AJOUT MUTILPLE DE SPECIALITY	:::::::::::::::::::::::::::::::::::::
-
-const setSpecialitys = ref({
-    selectedItems: [],
-    level: {},
-    specialitys: [],
-    showModal: false
-})
-
-function showSpecialityModalF(level){
-    setSpecialitys.value.showModal = true
-    setSpecialitys.value.level = level
-
-    if(setSpecialitys.value.specialitys.length < 1){
-        is_loading.value.get_speciality = true
-
-        SpecialityService.get_speciality().then((res) => {
-            is_loading.value.get_speciality = false
-            setSpecialitys.value.specialitys = res.data
-        })
-    }
-}
-
-function closeSpecialityModalF(){
-    setSpecialitys.value.showModal = false
-    clearAllSetSpeciality()
-}
-
-const select_speciality = (speciality) => {
-    const isAlreadySelected = setSpecialitys.value.selectedItems.find(item => item.id === speciality.id)
-
-    if (!isAlreadySelected) {
-        setSpecialitys.value.selectedItems.push(speciality)
-    }
-}
-
-const removeItemSpeciality = (itemId) => {
-    setSpecialitys.value.selectedItems = setSpecialitys.value.selectedItems.filter(item => item.id !== itemId)
-}
-const clearAllSetSpeciality = () => {
-    setSpecialitys.value.selectedItems = []
-    setSpecialitys.value.level = {}
-    errors.value.set_speciality = null
-}
-
-function submitSetSpeciality(){
-    const ids = {
-        specialitys: setSpecialitys.value.selectedItems.map(item => item.id)
-    }
-
-    if(ids.specialitys.length > 0){
-        
-        is_loading.value.set_speciality = true
-        LevelService.set_specialitys(setSpecialitys.value.level.id, ids).then((res)=> {
-            is_loading.value.set_speciality = false
-            closeSpecialityModalF()
-            Notification.success("Ajourt réussir.")
-        }).catch((error) => {
-            errors.value.set_speciality = error.response.data
-            is_loading.value.set_speciality = false
-        })
-    }
-}
-
-// :::::::::::::::::::::::::::::::	GESTION DE L'AJOUT MUTILPLE DE SPECIALITY	:::::::::::::::::::::::::::::::::::::
-
-
 
 // :::::::::::::::::::::::::::::::	GESTION DE L'AFFICHARGE MUTILPLE DE SPECIALITY	:::::::::::::::::::::::::::::::::::::
 
 const allSpecialitys = ref({
-    level: {},
+    department: {},
     specialitys: [],
     showModal: false
 })
 
-const allSpecialitysData = ref([])
-
-const {
-    isAllSelected,
-    isIndeterminate,
-    selectedItems,
-    isSelected,
-    toggleAll,
-    toggleItem
-} = useCheckbox(allSpecialitysData)
-
-function showAllSpecialityModalF(level){
+function showAllSpecialityModalF(department){
     allSpecialitys.value.showModal = true
 
-    if(allSpecialitys.value.level.id != level.id){
-        allSpecialitys.value.level = level
+    if(allSpecialitys.value.department.id != department.id){
+        allSpecialitys.value.department = department
         is_loading.value.get_allSpeciality = true
 
-        LevelService.get_level({id: level.id}).then((res) => {
+        DepartmentService.get_department({id: department.id}).then((res) => {
             is_loading.value.get_allSpeciality = false
             allSpecialitys.value.specialitys = res.data.specialitys
-            allSpecialitysData.value = res.data.specialitys
         })
     }
-}
-
-function deleteAllSpecialitys(){
-    const form = {ids: selectedItems.value}
-    console.log(form)
-    // StudentService.deleteStudentsIDS(form).then((res)=> {
-    // 	students.value = students.value.filter(
-    // 		stud => !res.data.deleted.includes(stud.id)
-    // 	)
-    // 	selectedItems.value = []
-    // 	Notification.success("Suppréssion réussir.")
-    // }).catch((error) => Notification.error("Une erreur innatendus s'est produit, veuillez réessayer."))
-    // .finally(() => {
-    // 	deleteLoading.value = false
-    // 	closeDeleteModalF()
-    // })
 }
 
 </script>

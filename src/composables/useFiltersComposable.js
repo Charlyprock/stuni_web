@@ -78,7 +78,7 @@ export function useFilters(options = { defaultSelectFirst: true }) {
         }
 
         try {
-            const res = await LevelService.get_level(level_id)
+            const res = await LevelService.get_level({id: level_id})
             loading.value.speciality = false
             const data = res.data.specialitys
             specialitys.value = data

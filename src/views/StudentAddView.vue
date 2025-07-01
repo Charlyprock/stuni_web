@@ -396,7 +396,7 @@ function get_specialitys(level_id){
 	form.value.speciality = null
 	select.value.speciality = null
 
-	LevelService.get_level(level_id).then((res) => {
+	LevelService.get_level({id: level_id}).then((res) => {
 		loading.value.speciality = false
 		const  data = res.data.specialitys
 		if(data.length >= 1){

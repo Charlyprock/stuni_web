@@ -2,7 +2,7 @@
 	<div class="dropdown dropdown-start w-full">
 		<button :disabled="props.values.length < 1" tabindex="0" role="button"
 			class="w-full flex items-center justify-between btn btn-outline border-base-300 p-(--padding-box) text-sm">
-			<p class="text-nowrap overflow-hidden text-ellipsis max-w-[80%]">{{ props.name }} ({{ select?.name }})</p>
+			<p class="text-nowrap overflow-hidden text-ellipsis max-w-[80%]">{{ props.name }} ({{ select?.[props.defaulField] }})</p>
 			<LoadingIcon v-if="props.loading" class="size-(--icon-size)" />
 			<DirectionIcon v-else class="size-(--icon-size)" />
 		</button>
@@ -12,7 +12,7 @@
 				class="max-w-full overflow-hidden rounded-field">
 				<div class="flex items-center gap-2 w-full">
 					<CheckIcon :class="[select?.id != value.id ? 'text-transparent' : '', 'size-(--icon-size)']" />
-					<a class="text-nowrap overflow-hidden text-ellipsis flex-1">{{ value.name }}</a>
+					<a class="text-nowrap overflow-hidden text-ellipsis flex-1">{{ value[props.defaulField] }}</a>
 				</div>
 			</li>
 		</ul>
@@ -32,6 +32,9 @@ const props = defineProps({
 	},
 	values: null,
 	name: '',
+	defaulField: {
+		default: 'name'
+	},
 	defaultSelect: Object
 })
 
@@ -52,6 +55,10 @@ watch(() => props.values, (newValues) => {
 		// emit('selectValue', select.value)
 	}
 }, { immediate: true });
+
+watch(() => props.defaultSelect, (newValues) => {
+	select.value = newValues
+})
 
 function select_value(value) {
 	if (value.id != select.value.id) {
