@@ -259,7 +259,7 @@ import Modal from '@/components/ModalComponent.vue'
 import Pargination from '@/components/ParginationComponent.vue';
 import { useFilters } from '@/composables/useFiltersComposable'
 import { usePargination } from '@/composables/useParginationComposable';
-import { useCheckbox } from '@/composables/useCheckboxComponent';
+import { useCheckbox } from '@/composables/useCheckboxComposable';
 import { useUnivercityYearStore } from '@/stores/yearStore';
 import { StudentService } from '@/services';
 import { onMounted, ref, watch, computed } from 'vue';

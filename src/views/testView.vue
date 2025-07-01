@@ -1,156 +1,143 @@
 <template>
-  <div class="p-8 space-y-4">
-    <h1 class="text-2xl font-bold mb-6">Exemples de Modal</h1>
-    
-    <!-- Boutons pour ouvrir différents types de modals -->
-    <div class="space-x-4">
-      <button @click="showConfirmModal = true" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-        Modal de Confirmation
-      </button>
-      
-      <button @click="showDeleteModal = true" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-        Modal de Suppression
-      </button>
-      
-      <button @click="showCustomModal = true" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-        Modal Personnalisé
-      </button>
-      
-      <button @click="showPersistentModal = true" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
-        Modal Persistant
-      </button>
-    </div>
+	<div class="container">
+		<button @click="showSpecialityModalF()" data-tip="Nouveaux Niveau" class="btn btn-neutral tooltip tooltip-left btn-sm text-nowrap">
+			<AddIcon class="size-(--icon-size)" />
+		</button>
 
-    <!-- Résultats des actions -->
-    <div v-if="lastAction" class="mt-4 p-4 bg-gray-100 rounded">
-      <strong>Dernière action:</strong> {{ lastAction }}
-    </div>
+		<!-- Modal avec contenu personnalisé -->
+        <Modal 
+            v-model="setSpecialitys.showModal" 
+            title="Formulaire personnalisé" 
+            confirm-text="Sauvegarder" 
+            cancel-text="Fermer"
+            confirm-button-type="primary"
+			:persistent="true"
+			:loading="is_loading.set_speciality"
+			@cancel="closeSpecialityModalF"
+            @confirm="submitSetSpeciality"
+        >
+			<form>
 
-    <!-- Modal de confirmation simple -->
-    <Modal
-      v-model="showConfirmModal"
-      title="Confirmer l'action"
-      message="Êtes-vous sûr de vouloir continuer ?"
-      confirm-text="Oui, continuer"
-      cancel-text="Annuler"
-      @confirm="handleConfirm('Confirmation acceptée')"
-      @cancel="handleCancel('Confirmation annulée')"
-    />
+				<div class="my-3 flex justify-between">
+					<div class="max-w-[80%]">
+						<SelectFilter
+							:values="setSpecialitys.specialitys" 
+							name="Spécialité"
+							:loading="is_loading.get_speciality"
+							@select-value="select_speciality"
+						/>
+					</div>
 
-    <!-- Modal de suppression (type danger) -->
-    <Modal
-      v-model="showDeleteModal"
-      title="Supprimer l'élément"
-      message="Cette action est irréversible. Êtes-vous sûr de vouloir supprimer cet élément ?"
-      confirm-text="Supprimer"
-      cancel-text="Conserver"
-      confirm-button-type="danger"
-      :loading="deleteLoading"
-      @confirm="handleDelete"
-      @cancel="handleCancel('Suppression annulée')"
-    />
+					<!-- Actions -->
+					<div class="">
+						<button type="button" @click="clearAllSetSpeciality" v-if="setSpecialitys.selectedItems.length > 0" class="btn btn-error">
+							<DeleteIcon class="size-(--icon-size)" />
+						</button>
+					</div>
 
-    <!-- Modal avec contenu personnalisé -->
-    <Modal
-      v-model="showCustomModal"
-      title="Formulaire personnalisé"
-      confirm-text="Sauvegarder"
-      cancel-text="Fermer"
-      confirm-button-type="success"
-      @confirm="handleSave"
-      @cancel="handleCancel('Formulaire fermé')"
-    >
-      <div class="space-y-4">
-        <div v-for="i in 8">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-          <input 
-            v-model="formData.name"
-            type="text" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Entrez votre nom"
-          >
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input 
-            v-model="formData.email"
-            type="email" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Entrez votre email"
-          >
-        </div>
-      </div>
-    </Modal>
+				</div>
+				
+				<!-- Liste des éléments sélectionnés -->
+				<div class="w-full border border-base-300 rounded-field" v-if="setSpecialitys.selectedItems.length > 0">
+					
+					<div class="flex flex-wrap gap-3 p-3">
+						<div v-for="item in setSpecialitys.selectedItems" :key="item.id" class="p-2 rounded-field bg-base-200/50 flex gap-1 text-base-content/70">
+							<span>{{ item.name }}</span>
+							<button type="button" @click="removeItemSpeciality(item.id)" class="btn btn-xs">
+								<CloseIcon class="size-(--icon-size) p-[2px]" />
+							</button>
+						</div>
+					</div>
 
-    <!-- Modal persistant (ne se ferme pas en cliquant dehors) -->
-    <Modal
-      v-model="showPersistentModal"
-      title="Action importante"
-      message="Cette modal ne peut être fermée qu'en cliquant sur un bouton."
-      confirm-text="J'ai compris"
-      cancel-text="Fermer"
-      :persistent="true"
-      :show-close-button="false"
-      confirm-button-type="warning"
-      @confirm="handleConfirm('Modal persistant fermé')"
-      @cancel="handleCancel('Modal persistant annulé')"
-    />
-  </div>
+				</div>
+				
+                <p v-for="error in errors.set_speciality?.['specialitys']" class="text-error text-start text-xs">{{ error }}</p>
+			</form>
+        </Modal>
+
+	</div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { 
+	AddIcon, CloseIcon, MenuIcon, EditIcon, DeleteIcon,
+} from '@/components/icons';
+import SelectFilter from '@/components/SelectFilterComponent.vue';
 import Modal from '@/components/ModalComponent.vue'
+import { LevelService, SpecialityService } from '@/services';
+import { onMounted, ref, computed } from 'vue';
 
-// États des modals
-const showConfirmModal = ref(false)
-const showDeleteModal = ref(false)
-const showCustomModal = ref(false)
-const showPersistentModal = ref(false)
 
-// États des actions
-const lastAction = ref('')
-const deleteLoading = ref(false)
-
-// Données du formulaire personnalisé
-const formData = reactive({
-  name: '',
-  email: ''
+const is_loading = ref({
+	get_speciality: false,
+	set_speciality: false
+})
+const errors = ref({
+    set_level: null,
+    set_speciality: null,
 })
 
-// Gestionnaires d'événements
-const handleConfirm = (message) => {
-  lastAction.value = message
-  showConfirmModal.value = false
-  showPersistentModal.value = false
+// :::::::::::::::::::::::::::::::	GESTION DE L'AJOUT MUTILPLE DE SPECIALITY	:::::::::::::::::::::::::::::::::::::
+
+const setSpecialitys = ref({
+	selectedItems: [],
+	specialitySelect: {},
+	specialitys: [],
+	showModal: false
+})
+
+function showSpecialityModalF(){
+	setSpecialitys.value.showModal = true
+
+	if(setSpecialitys.value.specialitys.length < 1){
+		is_loading.value.get_speciality = true
+
+		SpecialityService.get_speciality().then((res) => {
+			is_loading.value.get_speciality = false
+			setSpecialitys.value.specialitys = res.data
+		})
+	}
 }
 
-const handleCancel = (message) => {
-  lastAction.value = message
+function closeSpecialityModalF(){
+	setSpecialitys.value.showModal = false
+	clearAllSetSpeciality()
 }
 
-const handleDelete = async () => {
-  deleteLoading.value = true
-  
-  // Simulation d'une requête de suppression
-  await new Promise(resolve => setTimeout(resolve, 2000))
-  
-  deleteLoading.value = false
-  showDeleteModal.value = false
-  lastAction.value = 'Élément supprimé avec succès'
+const select_speciality = (speciality) => {
+	const isAlreadySelected = setSpecialitys.value.selectedItems.find(item => item.id === speciality.id)
+
+	if (!isAlreadySelected) {
+		setSpecialitys.value.selectedItems.push(speciality)
+	}
 }
 
-const handleSave = () => {
-  if (!formData.name || !formData.email) {
-    alert('Veuillez remplir tous les champs')
-    return
-  }
-  
-  lastAction.value = `Données sauvegardées: ${formData.name} (${formData.email})`
-  showCustomModal.value = false
-  
-  // Réinitialiser le formulaire
-  formData.name = ''
-  formData.email = ''
+const removeItemSpeciality = (itemId) => {
+	setSpecialitys.value.selectedItems = setSpecialitys.value.selectedItems.filter(item => item.id !== itemId)
 }
+const clearAllSetSpeciality = () => {
+	setSpecialitys.value.selectedItems = []
+	errors.value.set_speciality = null
+}
+
+function submitSetSpeciality(){
+	const ids = {
+		specialitys: setSpecialitys.value.selectedItems.map(item => item.id)
+	}
+
+	if(ids.specialitys.length > 0){
+		
+		is_loading.value.set_speciality = true
+		LevelService.set_specialitys(1, ids).then((res)=> {
+			is_loading.value.set_speciality = false
+			closeSpecialityModalF()
+		}).catch((error) => {
+			errors.value.set_speciality = error.response.data
+			is_loading.value.set_speciality = false
+		})
+	}
+}
+
+// :::::::::::::::::::::::::::::::	GESTION DE L'AJOUT MUTILPLE DE SPECIALITY	:::::::::::::::::::::::::::::::::::::
+
 </script>
