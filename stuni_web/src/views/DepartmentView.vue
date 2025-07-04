@@ -218,10 +218,10 @@ function update_department(){
 function set_department(){
     DepartmentService.set_department(form.value).then((res)=>{
         departments.value.unshift(res.data)
-        closeDepartmentModalF()
         Notification.success("Ajout réussir.")
     }).catch((error) => {
         Notification.error("Une erreur innatendus s'est produit, veuillez réessayer.")
+        closeDepartmentModalF()
         errors.value.set_department = error.response.data
     })
     .finally(() => {
@@ -240,7 +240,7 @@ function resetForm(){
         abbreviation: null,
         admin: null,
     }
-    defaulAdminSelect.value = []
+
     errors.value = {
         set_department: null,
     }

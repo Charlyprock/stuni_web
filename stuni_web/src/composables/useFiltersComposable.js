@@ -9,7 +9,7 @@ export function useFilters(options = { defaultSelectFirst: true }) {
     // Ajout d'un flag pour l'initialisation
     const isInitializing = ref(true)
 
-    const formId = ref({
+    const form = ref({
         level: null,
         speciality: null,
         classe: null,
@@ -73,7 +73,7 @@ export function useFilters(options = { defaultSelectFirst: true }) {
         
         // Ne réinitialiser que si ce n'est pas une restauration depuis l'URL
         if (!fromUrl) {
-            formId.value.speciality = null
+            form.value.speciality = null
             select.value.speciality = null
         }
 
@@ -111,7 +111,7 @@ export function useFilters(options = { defaultSelectFirst: true }) {
         
         // Ne réinitialiser que si ce n'est pas une restauration depuis l'URL
         if (!fromUrl) {
-            formId.value.classe = null
+            form.value.classe = null
             select.value.classe = null
         }
 
@@ -119,7 +119,7 @@ export function useFilters(options = { defaultSelectFirst: true }) {
             loading.value.classe = true
             
             try {
-                const res = await SpecialityService.get_speciality({id: speciality_id})
+                const res = await SpecialityService.get_speciality(speciality_id)
                 loading.value.classe = false
                 const data = res.data.classes
                 classes.value = data
@@ -151,8 +151,8 @@ export function useFilters(options = { defaultSelectFirst: true }) {
     }
 
     const select_level = async (level, fromUrl = false) => {
-        if (formId.value.level !== level.id) {
-            formId.value.level = level.id
+        if (form.value.level !== level.id) {
+            form.value.level = level.id
             select.value.level = level
             
             if (fromUrl || isInitializing.value) {
@@ -167,8 +167,8 @@ export function useFilters(options = { defaultSelectFirst: true }) {
     }
 
     const select_speciality = async (speciality, fromUrl = false) => {
-        if (formId.value.speciality !== speciality.id) {
-            formId.value.speciality = speciality.id
+        if (form.value.speciality !== speciality.id) {
+            form.value.speciality = speciality.id
             select.value.speciality = speciality
             
             if (fromUrl || isInitializing.value) {
@@ -183,8 +183,8 @@ export function useFilters(options = { defaultSelectFirst: true }) {
     }
 
     const select_classe = (classe, fromUrl = false) => {
-        if (formId.value.classe !== classe.id) {
-            formId.value.classe = classe.id
+        if (form.value.classe !== classe.id) {
+            form.value.classe = classe.id
             select.value.classe = classe
             
             if (!fromUrl && !isInitializing.value) {
@@ -204,7 +204,7 @@ export function useFilters(options = { defaultSelectFirst: true }) {
     })
 
     return {
-        formId,
+        form,
         select,
         loading,
         levels,

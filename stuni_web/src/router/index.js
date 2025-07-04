@@ -14,8 +14,6 @@ const router = createRouter({
             {path: 'student-add', name: 'student-add', component: () => import('@/views/StudentAddView.vue')},
             {path: 'level', name: 'level', component: () => import('@/views/LevelView.vue')},
             {path: 'department', name: 'department', component: () => import('@/views/DepartmentView.vue')},
-            {path: 'speciality', name: 'speciality', component: () => import('@/views/SpecialityView.vue')},
-            {path: 'classe', name: 'classe', component: () => import('@/views/ClasseView.vue')},
             {path: 'test', name: 'test', component: () => import('@/views/testView.vue')},
           ]
         },
