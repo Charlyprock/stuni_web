@@ -194,6 +194,7 @@ import {
 } from '@/components/icons';
 import ImageUploader from '@/components/ImageUploaderComponent.vue';
 import SelectFilter from '@/components/SelectFilterComponent.vue';
+import { useFilters } from '@/composables/useFiltersComposable'
 import { LevelService, SpecialityService, StudentService } from '@/services';
 import { NotificationUtil, DateUtil, ValidatedUtil } from '@/utils';
 import { onMounted, ref, watch } from 'vue';
@@ -202,27 +203,25 @@ const Notification = NotificationUtil.notificationsUtil()
 
 const uploaderComponent = ref(null)
 let errors = ref({})
-const loading = ref({
-	send: false,
-	level: false,
-	speciality: false,
-	classe: false
-})
 
 const isShowPassword = ref(false)
 const togglePasswordVisibility = () => {
     isShowPassword.value = !isShowPassword.value
 }
 
-const select = ref({
-	level: null,
-	speciality: null,
-	classe: null
-})
 
-const levels = ref([])
-const specialitys = ref([])
-const classes = ref([])
+const {
+  formId,
+  select,
+  levels,
+  specialitys,
+  classes,
+  loading,
+  select_level,
+  select_speciality,
+  select_classe,
+} = useFilters({ defaultSelectFirst: true })
+
 
 const form = ref({
 	email: null,
@@ -245,7 +244,6 @@ const form = ref({
 	is_work: null,
 })
 
-	
 const validationRules = ref({
 	email: {
 		required: false,
@@ -349,81 +347,6 @@ const validationRules = ref({
 	}
 })
 
-onMounted(() => {
-	loading.value.level = true
-	LevelService.get_level().then((res) => {
-		loading.value.level = false
-		levels.value = res.data
-		if(res.data.length >= 1){
-			form.value.level = res.data[0].id
-			select.value.level = res.data[0]
-			get_specialitys(res.data[0].id)
-		}
-	})
-})
-
-watch(() => select.value.speciality, (speciality) => {
-	get_classes(speciality?.id)
-})
-
-function select_level(level){
-
-	if(form.value.level != level.id){
-		loading.value.speciality = true
-		form.value.level = level.id
-		select.value.level = level
-	
-		get_specialitys(level.id)
-	}
-}
-
-function select_speciality(speciality){
-	// la requette s'effectue dans un watcher
-	form.value.speciality = speciality.id
-	select.value.speciality = speciality
-}
-
-function select_classe(classe){
-	
-	if (classe.id != select.value.classe){
-		form.value.classe = classe.id
-		select.value.classe = classe
-	}
-}
-
-function get_specialitys(level_id){
-	specialitys.value = []
-	form.value.speciality = null
-	select.value.speciality = null
-
-	LevelService.get_level({id: level_id}).then((res) => {
-		loading.value.speciality = false
-		const  data = res.data.specialitys
-		if(data.length >= 1){
-			form.value.speciality = data[0].id
-			select.value.speciality = data[0]
-			specialitys.value = data
-		}
-	})
-}
-
-function get_classes(speciality_id){
-	classes.value = []
-	form.value.classe = null
-	select.value.classe = null
-
-	if (speciality_id){
-		SpecialityService.get_speciality(speciality_id).then((res) => {
-			loading.value.classe = false
-			const  data = res.data.classes
-			if(data.length >= 1){
-				form.value.classe = data[0].id
-				select.value.classe = data[0]
-				classes.value = data
-			}
-		})
-	}
-}
 
 function onImageChanged(data) {
 	form.value.image = data.file
@@ -446,6 +369,11 @@ function resetImage(){
 }
 
 function validated(){
+	
+	form.value.level = formId.value.level
+	form.value.speciality = formId.value.speciality
+	form.value.classe = formId.value.classe
+
 	const result = ValidatedUtil.processForm(validationRules.value, form.value)
 	errors.value = result.errors
 	if(result.success){

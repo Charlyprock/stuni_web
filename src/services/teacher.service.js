@@ -1,20 +1,20 @@
 import Axios from './axios.service'
 import { useUnivercityYearStore } from '@/stores/yearStore'
 
-let setStudent = (formData) => {
-    return Axios.post("/students/", formData)
+let setTeacher = (formData) => {
+    return Axios.post("/teachers/", formData)
 }
 
-let getStudents = (option = {
+let getTeachers = (option = {
     level: null,
     speciality: null,
     department: null,
     classe: null,
     search: null
 }) => {
-    // /students/?year=2024/2025&level=1&speciality=1&department=1&classe=1 &search=charly
+    // /teachers/?year=2024/2025&level=1&speciality=1&department=1&classe=1 &search=charly
     const yearStore = useUnivercityYearStore()
-    return Axios.get("/students/", {
+    return Axios.get("/teachers/", {
         params: {
             year: yearStore.currentYear,
             level: option.level,
@@ -26,19 +26,19 @@ let getStudents = (option = {
     })
 }
 
-let deleteStudentsIDS = (formData) => {
-    return Axios.delete("/students/students-ids-delete/", {
+let deleteTeachersIDS = (formData) => {
+    return Axios.delete("/teachers/teachers-ids-delete/", {
         data: formData
     })
 }
 
-let deleteStudent = (id) => {
-    return Axios.delete(`/students/${id}/`)
+let deleteTeacher = (id) => {
+    return Axios.delete(`/teachers/${id}/`)
 }
 
-export const StudentService = {
-    setStudent,
-    getStudents,
-    deleteStudentsIDS,
-    deleteStudent,
+export const TeacherService = {
+    setTeacher,
+    getTeachers,
+    deleteTeachersIDS,
+    deleteTeacher,
 }

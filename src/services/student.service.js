@@ -10,11 +10,13 @@ let getStudents = (option = {
     speciality: null,
     department: null,
     classe: null,
-    search: null
+    search: null,
+    id: null,
 }) => {
     // /students/?year=2024/2025&level=1&speciality=1&department=1&classe=1 &search=charly
     const yearStore = useUnivercityYearStore()
-    return Axios.get("/students/", {
+    const student_id = option.id ?? ''
+    return Axios.get(`/students/${student_id}`, {
         params: {
             year: yearStore.currentYear,
             level: option.level,
@@ -36,9 +38,14 @@ let deleteStudent = (id) => {
     return Axios.delete(`/students/${id}/`)
 }
 
+let updateStudent = (id, formData) => {
+    return Axios.patch(`/students/${id}/`, formData)
+}
+
 export const StudentService = {
     setStudent,
     getStudents,
     deleteStudentsIDS,
     deleteStudent,
+    updateStudent,
 }

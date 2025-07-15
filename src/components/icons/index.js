@@ -15,6 +15,8 @@ import ImagePlusIcon from "./ImagePlusIcon.vue"
 import RefreschIcon from "./RefreschIcon.vue"
 import DetailIcon from "./DetailIcon.vue"
 import CloseIcon from "./CloseIcon.vue"
+import DownloadIcon from "./DownloadIcon.vue"
+import FileIcon from "./FileIcon.vue"
 
 export {
     AddIcon,
@@ -34,4 +36,6 @@ export {
     RefreschIcon,
     DetailIcon,
     CloseIcon,
+    DownloadIcon,
+    FileIcon,
 }
