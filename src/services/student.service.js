@@ -42,10 +42,20 @@ let updateStudent = (id, formData) => {
     return Axios.patch(`/students/${id}/`, formData)
 }
 
+let setEnrollment = (formData) => {
+    return Axios.post("/enrollments/", formData)
+}
+
+let updateEnrollment = (id, formData) => {
+    return Axios.patch(`/enrollments/${id}/`, formData)
+}
+
 export const StudentService = {
     setStudent,
     getStudents,
     deleteStudentsIDS,
     deleteStudent,
     updateStudent,
+    setEnrollment,
+    updateEnrollment,
 }

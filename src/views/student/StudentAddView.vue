@@ -90,10 +90,10 @@
 						<legend class="fieldset-legend">genre</legend>
 
 						<label class="label" for="maxculin">Maxculin</label>
-						<input v-model="form.genre" id="maxculin" type="radio" name="radio-1" class="radio" value="M" />
+						<input v-model="form.genre" id="maxculin" type="radio" name="radio-1" class="radio" value="m" />
 
 						<label class="label" for="feminin">Féminin</label>
-						<input v-model="form.genre" id="feminin" type="radio" name="radio-1" class="radio" value="F" />
+						<input v-model="form.genre" id="feminin" type="radio" name="radio-1" class="radio" value="f" />
 					</fieldset>
 					<p v-for="error in errors['genre']" class="text-error text-start">{{ error }}</p>
 

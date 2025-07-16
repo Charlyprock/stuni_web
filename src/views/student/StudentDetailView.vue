@@ -11,13 +11,12 @@
 
                     <div class="flex items-center gap-3 -mt-5 ml-3">
                         <div class="mask mask-squircle size-[80px] bg-base-100">
-                            <img :src="data.user?.image" alt="l'image de l'étudiant" class="size-full object-cover"/>
+                            <img :src="data.student.user?.image" alt="l'image de l'étudiant" class="size-full object-cover"/>
                         </div>
 
                         <div class="mt-5">
-                            <span class="font-semibold uppercase">{{ data.user?.last_name }} </span>
-                            <span> {{ data.user?.first_name }}</span>
-                            <p class="opacity-60 text-sm">#{{ data.user?.code }}</p>
+                            <span class="">{{ data.student.user?.last_name }} </span> <span> {{ data.student.user?.first_name }}</span>
+                            <p class="opacity-60 text-sm flex items-center gap-2">#{{ data.student.user?.code }} <span v-if="data.student.is_work"><WorkIcon /></span></p>
                         </div>
                     </div>
                 </div>
@@ -25,45 +24,39 @@
                 <div class="mt-5 space-y-3">
                     <div class="flex justify-between items-center">
                         <p class="opacity-60">Email: </p>
-                        <p class="text-end">{{ data.user?.email ?? '---' }}</p>
+                        <p class="text-end">{{ data.student.user?.email ?? '---' }}</p>
                     </div>
 
                     <div class="flex justify-between items-center">
                         <p class="opacity-60">Téléphone: </p>
-                        <p class="text-end">{{ data.user?.phone ?? '---' }}</p>
+                        <p class="text-end">{{ data.student.user?.phone ?? '---' }}</p>
                     </div>
 
                     <div class="flex justify-between items-center">
                         <p class="opacity-60">Addresse </p>
-                        <p class="text-end">{{ data.user?.address ?? '---' }}</p>
+                        <p class="text-end">{{ data.student.user?.address ?? '---' }}</p>
                     </div>
 
                     <div class="flex justify-between items-center">
                         <p class="opacity-60">Genre: </p>
-                        <p class="text-end uppercase">{{ data.user?.genre ?? '---' }}</p>
+                        <p class="text-end uppercase">{{ data.student.user?.genre ?? '---' }}</p>
                     </div>
 
                     <div class="flex justify-between items-center">
                         <p class="opacity-60">Nationnalité: </p>
-                        <p class="text-end">{{ data.user?.nationnality ?? '---' }}</p>
+                        <p class="text-end">{{ data.student.user?.nationnality ?? '---' }}</p>
                     </div>
 
                     <div class="flex justify-between items-center">
                         <p class="opacity-60">Date de naissance: </p>
-                        <p class="text-end">{{ data.birth_date ?? '---' }}</p>
+                        <p class="text-end">{{ data.student.birth_date ?? '---' }}</p>
                     </div>
 
                     <div class="flex justify-between items-center">
                         <p class="opacity-60">Lieux de naissance: </p>
-                        <p class="text-end">{{ data.birth_place ?? '---' }}</p>
+                        <p class="text-end">{{ data.student.birth_place ?? '---' }}</p>
                     </div>
 
-                    <div class="flex justify-between items-center">
-                        <p class="opacity-60">Travail: </p>
-                        <p class="text-end">
-                            <CheckIcon class=" size-(--icon-size) text-success" />
-                        </p>
-                    </div>
                 </div>
 
                 <!-- le bouton -->
@@ -116,7 +109,7 @@
                 <div class="flex items-center justify-between my-3">
                     <h1 class="text-xl">Inscriptions</h1>
 
-                    <button class="btn btn-neutral">
+                    <button @click="showFormEnrollment()" class="btn btn-neutral">
                         <div>
                             <AddIcon />
                         </div>
@@ -126,23 +119,39 @@
 
                 <div class="space-y-3">
 
-                    <div v-for="enrollment in data.enrollments" class="relative overflow-hidden flex justify-between items-center px-3 py-5 bg-base-100 rounded-field border-base-300">
+                    <div v-for="enrollment in data.enrollments" class="relative overflow-hidden px-3 py-3 bg-base-100 rounded-field border-base-300">
                         
                         <div v-if="enrollment.is_delegate" class="badge badge-soft badge-accent border border-accent absolute -top-1 -right-1">
                             Délégué
                         </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center flex-wrap gap-1">
+                                <div>
+                                    <p class="text-[10px]">Niveaux</p>
+                                    <p>{{ enrollment.level.abbreviation }}</p>
+                                </div>
+                                <div class="size-[5px] rounded-full bg-neutral"></div>
+                                <div>
+                                    <p class="text-[10px]">Spécialité</p>
+                                    <p>{{ enrollment.speciality.abbreviation }}</p>
+                                </div>
+                                <div class="size-[5px] rounded-full bg-neutral"></div>
+                                <div>
+                                    <p class="text-[10px]">Classe</p>
+                                    <p>{{ enrollment.classe.abbreviation }}</p>
+                                </div>
+                            </div>
 
-                        <div class="flex items-center flex-wrap gap-1">
-                            
-                            <p>{{ enrollment.level.abbreviation }}</p>
-                            <div class="size-[5px] rounded-full bg-neutral"></div>
-                            <p>{{ enrollment.speciality.abbreviation }}</p>
-                            <div class="size-[5px] rounded-full bg-neutral"></div>
-                            <p>{{ enrollment.classe.abbreviation }}</p>
+                            <div class=" border-l border-base-300 pl-2">
+                                {{ enrollment.year }}
+                            </div>
                         </div>
 
-                        <div class=" border-l border-base-300 pl-2">
-                            {{ enrollment.year }}
+                        <div class="flex justify-end">
+                            <button @click="showFormEnrollment(enrollment)" data-tip="Editer" class="btn btn-accent btn-xs tooltip tooltip-top">
+                                <EditIcon class="size-4" />
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -151,7 +160,7 @@
         </div>
 
 
-        <!-- Modal d'afficharge des specialitys -->
+        <!-- Modal d'édition de l'etudient -->
         <Modal 
             v-model="student.showModal" 
             title="Modification" 
@@ -169,7 +178,7 @@
                     <div class="size-[150px] bg-base-100 p-(--padding-box) rounded-full border border-base-300">
                         <div class="size-full">
                             <ImageUploader ref="uploaderComponent" 
-                                :default-image-url="data.user?.image" 
+                                :default-image-url="data.student.user?.image" 
                                 :max-size-m-b="5"
                                 :max-width="800" 
                                 :max-height="800" 
@@ -256,12 +265,73 @@
 				</fieldset>
             </div>
         </Modal>
+
+        <!-- Modal d'ajout/edition des inscriptions -->
+        <Modal 
+            v-model="enrollment.showModal" 
+            title="Inscription" 
+            confirm-text="Valider" 
+            cancel-text="Fermer"
+            :persistent="true"
+            confirm-button-type="primary"
+            :loading="enrollment.is_loading"
+            @confirm="validatedEnrollment"
+            @cancel="resetFormEnrollment"
+        >
+            <div>
+                <fieldset class="fieldset w-full space-y-3 h-fit bg-base-100 p-4 rounded-box border border-base-300">
+                    <legend class="fieldset-legend">Information inscription <span class="text-error text-lg">*</span></legend>
+
+                    <!-- Niveau -->
+                    <SelectFilter 
+                        :values="levels"
+                        name="Niveau"
+                        :loading="loading.level"
+                        @select-value="select_level"
+                    />
+                    <p v-for="error in enrollment.errors['level']" class="text-error text-start">{{ error }}</p>
+
+                    <!-- specialité -->
+                    <SelectFilter
+                        :values="specialitys" 
+                        name="Spécialité"
+                        :loading="loading.speciality"
+                        @select-value="select_speciality"
+                    />
+                    <p v-for="error in enrollment.errors['speciality']" class="text-error text-start">{{ error }}</p>
+
+                    <!-- classe -->
+                    <SelectFilter 
+                        :values="classes" 
+                        name="Classe"
+                        :loading="loading.classe"
+                        @select-value="select_classe"
+                    />
+                    <p v-for="error in enrollment.errors['classe']" class="text-error text-start">{{ error }}</p>
+
+                    <label class="label">Année acardemic</label>
+                    <input v-model="enrollment.form.year" type="text" class="input w-full validator" 
+                        pattern="(?=.*\d).{9,}"
+                        maxlength="9" 
+                        placeholder="2024/2025" 
+                        required
+                    />
+                    <p v-for="error in enrollment.errors['year']" class="text-error text-start">{{ error }}</p>
+
+                    <label class="label my-2">
+                        <input v-model="enrollment.form.is_delegate" value="true" type="checkbox" class="toggle" />
+                        Délégué
+                    </label>
+                    <p v-for="error in enrollment.errors['is_delegate']" class="text-error text-start">{{ error }}</p>
+                </fieldset>
+            </div>
+        </Modal>
     </div>
 </template>
 
 <script setup>
 import { 
-	PasswordIcon, DirectionIcon, 
+	WorkIcon, EditIcon, 
 	CheckIcon, DownloadIcon, FileIcon, LoadingIcon,
 	HiddenPasswordIcon, VuePasswordIcon,
 } from '@/components/icons';
@@ -269,9 +339,6 @@ import SelectFilter from '@/components/SelectFilterComponent.vue';
 import Modal from '@/components/ModalComponent.vue'
 import ImageUploader from '@/components/ImageUploaderComponent.vue';
 import { useFilters } from '@/composables/useFiltersComposable'
-import { usePargination } from '@/composables/useParginationComposable';
-import { useCheckbox } from '@/composables/useCheckboxComposable';
-import { useUnivercityYearStore } from '@/stores/yearStore';
 import { StudentService } from '@/services';
 import { onMounted, ref, watch, computed } from 'vue';
 import { NotificationUtil, ValidatedUtil } from '@/utils';
@@ -281,15 +348,20 @@ const route = useRoute()
 const Notification = NotificationUtil.notificationsUtil()
 
 const uploaderComponent = ref(null)
-const data = ref({})
+const data = ref({
+    student: {},
+    enrollments: []
+})
 
 onMounted(() => {
     
     StudentService.getStudents({id: route.params.id}).then((res) => {
-        data.value = res.data
+        data.value.student = res.data
+        data.value.enrollments = res.data.enrollments
     })
 })
 
+// ::::::::::::::::::::::::::::::::: INFO DE BASE :::::::::::::::::::::::::::::::::::::::::::::
 const student = ref({
     showModal: false,
     form : {
@@ -313,6 +385,7 @@ const student = ref({
 
 function onImageChanged(data) {
 	student.value.form.image = data.file
+    student.value.updateImage = true
 }
 
 function onImageRemoved() {
@@ -326,23 +399,24 @@ function onImageError(error) {
 function resetImage(){
 	if(uploaderComponent.value){
 		uploaderComponent.value.reset()
+        student.value.form.image = null
 	}
 }
 
 function showFormStudent(){
     student.value.form = {
-        email: data.value.user?.email,
-        first_name: data.value.user?.first_name,
-        last_name: data.value.user?.last_name,
-        // code: data.value.user?.code,
-        phone: data.value.user?.phone,
-        address: data.value.user?.address,
-        genre: data.value.user?.genre,
-        nationnality: data.value.user?.nationnality,
-        image: data.value.user?.image,
-        birth_date: data.value.birth_date,
-        birth_place: data.value.birth_place,
-        is_work: data.value.is_work,
+        email: data.value.student.user?.email,
+        first_name: data.value.student.user?.first_name,
+        last_name: data.value.student.user?.last_name,
+        // code: data.value.student.user?.code,
+        phone: data.value.student.user?.phone,
+        address: data.value.student.user?.address,
+        genre: data.value.student.user?.genre,
+        nationnality: data.value.student.user?.nationnality,
+        image: data.value.student.user?.image,
+        birth_date: data.value.student.birth_date,
+        birth_place: data.value.student.birth_place,
+        is_work: data.value.student.is_work,
     }
     student.value.showModal = true
 }
@@ -354,6 +428,10 @@ function resetFormStudent(){
 }
 
 function validatedStudent(){
+    if (!student.value.form.image || !student.value.updateImage) {
+        delete student.value.form.image
+        console.log(student.value.form)
+    }
 	const result = ValidatedUtil.processForm(ValidatedUtil.validationRules, student.value.form)
 	student.value.errors = result.errors
     console.log(result.errors)
@@ -365,10 +443,10 @@ function validatedStudent(){
 }
 
 function updateStudent(formData){
-	// student.value.is_loading = true
+	student.value.is_loading = true
 	
-	StudentService.updateStudent(data.value.id, formData).then((res) => {
-        data.value = res.data
+	StudentService.updateStudent(data.value.student.id, formData).then((res) => {
+        data.value.student = res.data
         resetFormStudent()
 		Notification.success("Etudiant enregitré avec succes.")
 	}).catch((error) => {
@@ -377,5 +455,101 @@ function updateStudent(formData){
 	}).finally(() => student.value.is_loading = false)
 }
 
+
+// :::::::::::::::::::::::::::::::::::::::::::::::::::: INFO SUR LES INSCRIPTION :::::::::::::::::::::::::::::::::::::::
+const enrollment = ref({
+    showModal: false,
+    form : {
+        speciality: null,
+        level: null,
+        classe: null,
+        student: null,
+        year: null,
+        is_delegate: false
+    },
+    is_loading: false,
+    errors: {}
+})
+
+const {
+    formId,
+    select,
+    levels,
+    specialitys,
+    classes,
+    loading,
+    select_level,
+    select_speciality,
+    select_classe,
+} = useFilters({ defaultSelectFirst: true })
+
+function showFormEnrollment(enroll=null){
+    if(enroll){
+        enrollment.value.form = {
+            id: enroll.id,
+            speciality: enroll.speciality.id,
+            level: enroll.level.id,
+            classe: enroll.classe.id,
+            year: enroll.year,
+            is_delegate: enroll.is_delegate
+        }
+    } else {
+        enrollment.value.form.speciality = formId.value.speciality
+        enrollment.value.form.level = formId.value.level
+        enrollment.value.form.classe = formId.value.classe
+    }
+    enrollment.value.form.student = data.value.student.id
+    enrollment.value.showModal = true
+}
+
+function resetFormEnrollment(){
+    enrollment.value.showModal = false
+    resetImage()
+	enrollment.value.form = ValidatedUtil.clearFormData(enrollment.value.form)
+}
+
+function validatedEnrollment(){
+	const result = ValidatedUtil.processForm(ValidatedUtil.validationRules, {year: enrollment.value.form.year})
+	enrollment.value.errors = result.errors
+    
+	if(result.success){
+        if (enrollment.value.form.id) {
+            updateEnrollment(enrollment.value.form)
+        } else {
+            setEnrollment(enrollment.value.form)
+        }
+	} else {
+		Notification.error("error", "erreur du formulaire.")
+	}
+}
+
+function setEnrollment(formData){
+	enrollment.value.is_loading = true
+	
+	StudentService.setEnrollment(formData).then((res) => {
+        data.value.enrollments.unshift(res.data)
+        resetFormEnrollment()
+		Notification.success("Inscription enregister avec succes.")
+	}).catch((error) => {
+		Notification.error("Erreur lors de la l'enregistrement des données.")
+		enrollment.value.errors = error.response.data
+	}).finally(() => enrollment.value.is_loading = false)
+}
+
+function updateEnrollment(formData){
+	enrollment.value.is_loading = true
+	
+	StudentService.updateEnrollment(data.value.student.id, formData).then((res) => {
+        data.value.student = res.data
+        data.value.enrollments = data.value.enrollments.map(
+            enroll => enroll.id == res.data.id ? res.data : enroll
+        )
+        resetFormEnrollment()
+		Notification.success("Inscription modifié avec succes.")
+	}).catch((error) => {
+		Notification.error("Erreur lors de la modification des données.")
+		enrollment.value.errors = error.response.data
+	}).finally(() => enrollment.value.is_loading = false)
+}
 
 </script>

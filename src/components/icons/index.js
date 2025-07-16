@@ -17,6 +17,7 @@ import DetailIcon from "./DetailIcon.vue"
 import CloseIcon from "./CloseIcon.vue"
 import DownloadIcon from "./DownloadIcon.vue"
 import FileIcon from "./FileIcon.vue"
+import WorkIcon from "./WorkIcon.vue"
 
 export {
     AddIcon,
@@ -38,4 +39,5 @@ export {
     CloseIcon,
     DownloadIcon,
     FileIcon,
+    WorkIcon
 }
