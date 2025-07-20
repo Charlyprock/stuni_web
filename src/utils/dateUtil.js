@@ -116,6 +116,7 @@ function calculateAge(birthDate) {
 }
 
 function formatDate(date, format) {
+  // returns date in the specified format
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
@@ -132,9 +133,17 @@ function formatDate(date, format) {
   }
 }
 
+function SetformatDate(dateString) {
+  // converts a date string to 'DD/MM/YYYY' format
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('fr-FR')
+}
+
 export const DateUtil = {
-    validateBirthDate,
-    validateYearFormat,
-    calculateAge,
-    formatDate,
+  validateBirthDate,
+  validateYearFormat,
+  calculateAge,
+  formatDate,
+  SetformatDate,
 }

@@ -238,7 +238,7 @@
 					
 		<Modal
 			v-model="showDeleteModal"
-			title="Supprimer l'élément"
+			title="Supprimer les étudiants"
 			message="Cette action est irréversible. Êtes-vous sûr de vouloir supprimer cet élément ?"
 			confirm-text="Supprimer"
 			cancel-text="Conserver"

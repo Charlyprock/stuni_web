@@ -1,13 +1,15 @@
 <template>
     <div class="flex gap-8">
-        <!-- les infos personnel -->
+        <!-- les infos personnel et attachement -->
         <div class="w-[50%] space-y-2">
+
+            <!-- les infos personnel -->
             <div class="bg-base-100 p-3 border border-base-300 rounded-field">
                 
                 <!-- l'image, nom et matricul -->
                 <div class="">
                     <!-- l'image -->
-                    <div class="w-full h-16 rounded-field bg-error"></div>
+                    <div class="w-full h-16 rounded-field" :style="{ backgroundImage: stringToGradient(data.student.user?.code) }"></div>
 
                     <div class="flex items-center gap-3 -mt-5 ml-3">
                         <div class="mask mask-squircle size-[80px] bg-base-100">
@@ -71,7 +73,7 @@
                 <div class="flex items-center justify-between my-3">
                     <h1 class="text-xl">Fichier Attacher</h1>
 
-                    <button class="btn btn-neutral">
+                    <button @click="showFormAttachment()" class="btn btn-neutral">
                         <div>
                             <DownloadIcon class="" />
                         </div>
@@ -79,23 +81,40 @@
                     </button>
                 </div>
 
-                <div class="space-y-3 mt-5">
+                <div v-if="data.attachments.length === 0" class="text-center py-8 opacity-60">
+                    <p>Aucun fichier attaché</p>
+                </div>
 
-                    <div v-for="i in 5" class="p-2 rounded-field flex justify-between items-center bg-base-200/30 border border-base-300/50">
+                <div class="space-y-3 mt-5">
+                    <div v-for="attachment in data.attachments" :key="attachment.id" 
+                         class="p-2 rounded-field flex justify-between items-center bg-base-200/30 border border-base-300/50">
                         <div class="flex items-center gap-2">
                             <div class="p-2 bg-base-200 rounded-field">
                                 <FileIcon class="" />
                             </div>
                             
                             <div>
-                                <p>Acte de Naissance</p>
-                                <p class="text-sm opacity-50">10/02/2024</p>
+                                <p>{{ attachment.title || attachment.file_name }}</p>
+                                <p class="text-sm opacity-50">{{ DateUtil.SetformatDate(attachment.created_at) }}</p>
+                                <p class="text-xs opacity-50">{{ attachment.mime_type }}</p>
                             </div>
                         </div>
 
-                        <button data-tip="Télécharger le fichier" class="btn btn-neutral btn-ghost btn-sm tooltip tooltip-top">
-                            <DownloadIcon class="" />
-                        </button>
+                        <div class="flex items-center">
+                            <button @click="downloadAttachment(attachment)" 
+                                    data-tip="Télécharger le fichier" 
+                                    class="btn btn-neutral btn-ghost btn-sm tooltip tooltip-top"
+                                    :disabled="attachement.is_loading.download">
+                                <LoadingIcon v-if="attachement.is_loading.download && attachement.current_id === attachment.id" class="animate-spin" />
+                                <DownloadIcon v-else class="" />
+                            </button>
+
+                            <button @click="confirmDeleteAttachment(attachment)" 
+                                    data-tip="Supprimer le fichier" 
+                                    class="btn btn-error btn-ghost btn-sm tooltip tooltip-top tooltip-error">
+                                <DeleteIcon class="" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -198,15 +217,6 @@
                 <!-- autre info -->
 				<fieldset class="fieldset w-full bg-base-100 p-4 rounded-box border border-base-300">
 					<legend class="fieldset-legend">Information Personnel</legend>
-
-					<!-- <label class="label">Matricule</label>
-					<label class="label text-success text-xm">Pas requis, calculé automatiquement.</label>
-					<input type="text" class="input w-full validator" 
-						maxlength="20" 
-						placeholder="STU2025GL0001"
-						v-model="student.form.code"
-					/>
-					<p v-for="error in student.errors['code']" class="text-error text-start">{{ error }}</p> -->
 
 					<label class="label">Nom <span class="text-error text-lg">*</span></label>
 					<input v-model="student.form.last_name" type="text" class="input w-full" placeholder="KOLO" required />
@@ -329,12 +339,56 @@
                 </fieldset>
             </div>
         </Modal>
+
+        <!-- Modal d'ajout d'attachement -->
+        <Modal 
+            v-model="attachement.showModal.upload" 
+            title="Ajouter un fichier" 
+            confirm-text="Enregistrer" 
+            cancel-text="Fermer"
+            :persistent="true"
+            confirm-button-type="primary"
+            :loading="attachement.is_loading.upload"
+            @confirm="validatedAttachment"
+            @cancel="resetFormAttachment"
+        >
+            <div>
+                <fieldset class="fieldset w-full bg-base-100 p-4 rounded-box border border-base-300">
+                    <legend class="fieldset-legend">Information du fichier <span class="text-error text-lg">*</span></legend>
+
+                    <label class="label">Titre du document <span class="text-error text-lg">*</span></label>
+                    <input v-model="attachement.form.title" type="text" class="input w-full" 
+                           placeholder="Ex: Acte de naissance, Certificat médical..." required />
+                    <p v-for="error in attachement.errors['title']" class="text-error text-start">{{ error }}</p>
+
+                    <label class="label">Fichier <span class="text-error text-lg">*</span></label>
+                    <input @change="onFileSelected" type="file" class="file-input file-input-bordered w-full" 
+                           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp" />
+                    <div class="text-sm opacity-60 mt-2">
+                        Formats acceptés: PDF, DOC, DOCX, JPG, PNG, WEBP (Max: 10MB)
+                    </div>
+                    <p v-for="error in attachement.errors['file']" class="text-error text-start">{{ error }}</p>
+                </fieldset>
+            </div>
+        </Modal>
+
+        <!-- modal de suppresion des attachments -->
+        <Modal
+			v-model="attachement.showModal.delete"
+			title="Supprimer ce fichier"
+			message="Cette action est irréversible. Êtes-vous sûr de vouloir supprimer ce fichier ?"
+			confirm-text="Supprimer"
+			cancel-text="Conserver"
+			confirm-button-type="danger"
+			:loading="attachement.is_loading.delete"
+			@confirm="handleDeleteAttachment"
+		/>
     </div>
 </template>
 
 <script setup>
 import { 
-	WorkIcon, EditIcon, 
+	WorkIcon, EditIcon, DeleteIcon, AddIcon,
 	CheckIcon, DownloadIcon, FileIcon, LoadingIcon,
 	HiddenPasswordIcon, VuePasswordIcon,
 } from '@/components/icons';
@@ -344,7 +398,7 @@ import ImageUploader from '@/components/ImageUploaderComponent.vue';
 import { useFilters } from '@/composables/useFiltersComposable'
 import { StudentService } from '@/services';
 import { onMounted, ref, watch, computed } from 'vue';
-import { NotificationUtil, ValidatedUtil } from '@/utils';
+import { NotificationUtil, ValidatedUtil, DateUtil } from '@/utils';
 import { useRoute } from 'vue-router';
 
 const route = useRoute()
@@ -353,16 +407,37 @@ const Notification = NotificationUtil.notificationsUtil()
 const uploaderComponent = ref(null)
 const data = ref({
     student: {},
-    enrollments: []
+    enrollments: [],
+    attachments: []
 })
 
+function stringToGradient(str) {
+    if (str){
+        let hash = 0
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash)
+        }
+
+        // Extraire deux couleurs à partir du hash
+        const color1 = '#' + ((hash >> 8) & 0xffffff).toString(16).padStart(6, '0')
+        const color2 = '#' + (hash & 0xffffff).toString(16).padStart(6, '0')
+
+        return `linear-gradient(135deg, ${color1}, ${color2})`
+    }
+}
+
+
 onMounted(() => {
-    
+    fetchStudentData()
+})
+
+function fetchStudentData() {
     StudentService.getStudents({id: route.params.id}).then((res) => {
         data.value.student = res.data
         data.value.enrollments = res.data.enrollments
+        data.value.attachments = res.data.attachments || []
     })
-})
+}
 
 // ::::::::::::::::::::::::::::::::: INFO DE BASE :::::::::::::::::::::::::::::::::::::::::::::
 const student = ref({
@@ -433,11 +508,10 @@ function resetFormStudent(){
 function validatedStudent(){
     if (!student.value.form.image || !student.value.updateImage) {
         delete student.value.form.image
-        console.log(student.value.form)
     }
 	const result = ValidatedUtil.processForm(ValidatedUtil.validationRules, student.value.form)
 	student.value.errors = result.errors
-    console.log(result.errors)
+    
 	if(result.success){
 		updateStudent(result.formData)
 	} else {
@@ -457,7 +531,6 @@ function updateStudent(formData){
 		student.value.errors = error.response.data
 	}).finally(() => student.value.is_loading = false)
 }
-
 
 // :::::::::::::::::::::::::::::::::::::::::::::::::::: INFO SUR LES INSCRIPTION :::::::::::::::::::::::::::::::::::::::
 const enrollment = ref({
@@ -502,14 +575,7 @@ function showFormEnrollment(enroll=null){
             level: enroll.level_display,
             classe: enroll.classe_display,
         }
-
-    }// else {
-    //     select.value = {
-    //         speciality: {},
-    //         level: {},
-    //         classe: {},
-    //     }
-    // }
+    }
     enrollment.value.form.student = data.value.student.id
     enrollment.value.showModal = true
 }
@@ -521,22 +587,11 @@ function resetFormEnrollment(){
     enrollment.value.form.is_delegate = false
 }
 
-function setObjectEnrollment(data){
-    return {
-        speciality: data.speciality_display,
-        level: data.level_display,
-        classe: data.classe_display,
-        year: data.year,
-        is_delegate: data.is_delegate
-    }
-}
-
 function validatedEnrollment(){
 	const result = ValidatedUtil.processForm(ValidatedUtil.validationRules, {year: enrollment.value.form.year})
 	enrollment.value.errors = result.errors
     
 	if(result.success){
-
         enrollment.value.form.speciality = select.value.speciality.id
         enrollment.value.form.level = select.value.level.id
         enrollment.value.form.classe = select.value.classe.id
@@ -586,6 +641,181 @@ function updateEnrollment(formData){
 		    Notification.error("Une erreur s'est produit lors de l'enregistrement, verifiez les informations et reéssayez.")
         }
 	}).finally(() => enrollment.value.is_loading = false)
+}
+
+// :::::::::::::::::::::::::::::::::::::::::::::::::::: GESTION DES ATTACHMENTS :::::::::::::::::::::::::::::::::::::::
+
+const attachement = ref({
+    showModal: {
+        upload: false,
+        delete: false,
+    },
+    form : {
+        file: null,
+        title: null,
+        student: null,
+    },
+    is_loading: {
+        upload: false,
+        delete: false,
+        download: false,
+    },
+    current_id: null,
+    current_attachment: null,
+    errors: {}
+})
+
+
+function showFormAttachment() {
+    attachement.value.form.student = data.value.student.id
+    attachement.value.showModal.upload = true
+}
+
+function resetFormAttachment() {
+    attachement.value.showModal.upload = false
+    attachement.value.form = ValidatedUtil.clearFormData(attachement.value.form)
+    attachement.value.errors = {}
+}
+
+// Gérer la sélection de fichier
+function onFileSelected(event) {
+    const file = event.target.files[0]
+    if (file) {
+        // Vérifier la taille du fichier (10MB max)
+        const maxSize = 10 * 1024 * 1024 // 10MB en bytes
+        if (file.size > maxSize) {
+            Notification.error("Le fichier est trop volumineux. Taille maximum: 10MB")
+            event.target.value = ''
+            return
+        }
+        
+        // Vérifier le type de fichier
+        const allowedTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/webp'
+        ]
+        
+        if (!allowedTypes.includes(file.type)) {
+            Notification.error("Type de fichier non supporté.")
+            event.target.value = ''
+            return
+        }
+        
+        attachement.value.form.file = file
+    }
+}
+
+// Valider et soumettre l'attachement
+function validatedAttachment() {
+    attachement.value.errors = {}
+    
+    if (!attachement.value.form.title || attachement.value.form.title.trim() === '') {
+        attachement.value.errors.title = ['Le titre est requis']
+    }
+    
+    if (!attachement.value.form.file) {
+        attachement.value.errors.file = ['Veuillez sélectionner un fichier']
+    }
+    
+    // Si pas d'erreurs, on procède à l'upload
+    if (Object.keys(attachement.value.errors).length === 0) {
+        uploadAttachment()
+    } else {
+        Notification.error("Veuillez corriger les erreurs du formulaire.")
+    }
+}
+
+// Upload du fichier
+function uploadAttachment() {
+    attachement.value.is_loading.upload = true
+    
+    const formData = new FormData()
+    formData.append('title', attachement.value.form.title)
+    formData.append('file', attachement.value.form.file)
+    formData.append('student', attachement.value.form.student)
+    
+    StudentService.uploadAttachment(formData).then((res) => {
+        data.value.attachments.unshift(res.data)
+        resetFormAttachment()
+        Notification.success("Fichier ajouté avec succès.")
+    }).catch((error) => {
+        attachement.value.errors = error.response?.data || {}
+        Notification.error("Erreur lors de l'ajout du fichier.")
+    }).finally(() => {
+        attachement.value.is_loading.upload = false
+    })
+}
+
+// Confirmer la suppression d'un attachement
+function confirmDeleteAttachment(attachment) {
+    attachement.value.current_attachment = attachment
+    attachement.value.showModal.delete = true
+}
+
+// Supprimer l'attachement
+function handleDeleteAttachment() {
+    if (!attachement.value.current_attachment) return
+    
+    attachement.value.is_loading.delete = true
+    
+    StudentService.deleteAttachment(attachement.value.current_attachment.id).then(() => {
+        data.value.attachments = data.value.attachments.filter(
+            att => att.id !== attachement.value.current_attachment.id
+        )
+        attachement.value.showModal.delete = false
+        attachement.value.current_attachment = null
+        Notification.success("Fichier supprimé avec succès.")
+    }).catch((error) => {
+        Notification.error("Erreur lors de la suppression du fichier.")
+    }).finally(() => {
+        attachement.value.is_loading.delete = false
+    })
+}
+
+function downloadAttachment(attachment) {
+    attachement.value.is_loading.download = true
+    attachement.value.current_id = attachment.id
+    
+    StudentService.downloadAttachment(attachment.id).then((response) => {
+        // Créer un lien de téléchargement
+        const blob = new Blob([response.data], { 
+            type: response.headers['content-type'] || 'application/octet-stream' 
+        })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        
+        // Récupérer le nom du fichier depuis les headers ou utiliser le titre
+        const contentDisposition = response.headers['content-disposition']
+        let filename = attachment.file_name || attachment.title
+        
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+            if (filenameMatch && filenameMatch[1]) {
+                filename = filenameMatch[1].replace(/['"]/g, '')
+            }
+        }
+        
+        link.href = url
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        
+        // Nettoyer
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+        
+        Notification.success("Téléchargement démarré.")
+    }).catch((error) => {
+        Notification.error("Erreur lors du téléchargement du fichier.")
+    }).finally(() => {
+        attachement.value.is_loading.download = false
+        attachement.value.current_id = null
+    })
 }
 
 </script>

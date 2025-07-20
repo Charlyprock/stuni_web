@@ -50,6 +50,32 @@ let updateEnrollment = (id, formData) => {
     return Axios.patch(`/enrollments/${id}/`, formData)
 }
 
+let uploadAttachment = (formData) => {
+    return Axios.post('/student-attachments/', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
+}
+
+let deleteAttachment = (attachmentId) => {
+    return Axios.delete(`/student-attachments/${attachmentId}/`)
+}
+
+let downloadAttachment = (attachmentId) => {
+    return Axios.get(`/student-attachments/${attachmentId}/download/`, {
+        responseType: 'blob'
+    })
+}
+
+let getStudentAttachments = (studentId) => {
+    return Axios.get(`/student-attachments/${studentId}`, {
+        params: {
+            student_id: studentId
+        }
+    })
+}
+
 export const StudentService = {
     setStudent,
     getStudents,
@@ -58,4 +84,8 @@ export const StudentService = {
     updateStudent,
     setEnrollment,
     updateEnrollment,
+    uploadAttachment,
+    deleteAttachment,
+    downloadAttachment,
+    getStudentAttachments
 }
