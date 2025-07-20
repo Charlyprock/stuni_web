@@ -105,7 +105,8 @@
 				<div class="my-3 flex justify-between">
 					<div class="max-w-[80%]">
 						<SelectFilter
-							:values="setSpecialitys.specialitys" 
+							:values="setSpecialitys.specialitys"
+                            :defaultSelect="{}"
 							name="Spécialité"
 							:loading="is_loading.get_speciality"
 							@select-value="select_speciality"
@@ -272,10 +273,10 @@ function update_level(){
 function set_level(){
 	LevelService.set_level(form.value).then((res)=>{
 		levels.value.unshift(res.data)
+        closeLevelModalF()
 		Notification.success("Ajout réussir.")
 	}).catch((error) => {
         Notification.error("Une erreur innatendus s'est produit, veuillez réessayer.")
-        closeLevelModalF()
         errors.value.set_level = error.response.data
     })
 	.finally(() => {

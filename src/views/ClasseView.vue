@@ -96,7 +96,7 @@
             @confirm="handleSetClasse"
             @cancel="resetForm"
         >
-            <form class="space-y-4">
+            <div class="space-y-4">
                 
                 <div>
                     <SelectFilter
@@ -116,7 +116,7 @@
                 <input v-model="form.abbreviation" type="text" required class="input w-full" placeholder="Abreviation" />
                 <p v-for="error in errors.set_classe?.['abbreviation']" class="text-error text-start text-xs">{{ error }}</p>
      
-            </form>
+            </div>
         </Modal>
 
         <!-- Modal de changement de délégué -->

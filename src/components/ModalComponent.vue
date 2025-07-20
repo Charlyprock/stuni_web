@@ -47,11 +47,11 @@
 
                         <!-- Footer -->
                         <div class="px-6 py-4 bg-base-200/30 rounded-b-box flex justify-end space-x-3">
-                            <button @click="handleCancel" :class="cancelButtonClass" :disabled="loading">
+                            <button type="button" @click="handleCancel" :class="cancelButtonClass" :disabled="loading">
                                 {{ cancelText }}
                             </button>
 
-                            <button @click="handleConfirm" :class="confirmButtonClass" :disabled="loading">
+                            <button type="button" @click="handleConfirm" :class="confirmButtonClass" :disabled="loading">
                                 <LoadingIcon v-if="loading" class="size-(--icon-size)" />
                                 {{ confirmText }}
                             </button>

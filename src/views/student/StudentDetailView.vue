@@ -129,17 +129,17 @@
                             <div class="flex items-center flex-wrap gap-1">
                                 <div>
                                     <p class="text-[10px]">Niveaux</p>
-                                    <p>{{ enrollment.level.abbreviation }}</p>
+                                    <p>{{ enrollment.level_display.abbreviation }}</p>
                                 </div>
                                 <div class="size-[5px] rounded-full bg-neutral"></div>
                                 <div>
                                     <p class="text-[10px]">Spécialité</p>
-                                    <p>{{ enrollment.speciality.abbreviation }}</p>
+                                    <p>{{ enrollment.speciality_display.abbreviation }}</p>
                                 </div>
                                 <div class="size-[5px] rounded-full bg-neutral"></div>
                                 <div>
                                     <p class="text-[10px]">Classe</p>
-                                    <p>{{ enrollment.classe.abbreviation }}</p>
+                                    <p>{{ enrollment.classe_display.abbreviation }}</p>
                                 </div>
                             </div>
 
@@ -285,6 +285,7 @@
                     <!-- Niveau -->
                     <SelectFilter 
                         :values="levels"
+                        :defaultSelect="select.level"
                         name="Niveau"
                         :loading="loading.level"
                         @select-value="select_level"
@@ -293,7 +294,8 @@
 
                     <!-- specialité -->
                     <SelectFilter
-                        :values="specialitys" 
+                        :values="specialitys"
+                        :defaultSelect="select.speciality"
                         name="Spécialité"
                         :loading="loading.speciality"
                         @select-value="select_speciality"
@@ -302,7 +304,8 @@
 
                     <!-- classe -->
                     <SelectFilter 
-                        :values="classes" 
+                        :values="classes"
+                        :defaultSelect="select.classe"
                         name="Classe"
                         :loading="loading.classe"
                         @select-value="select_classe"
@@ -487,17 +490,26 @@ function showFormEnrollment(enroll=null){
     if(enroll){
         enrollment.value.form = {
             id: enroll.id,
-            speciality: enroll.speciality.id,
-            level: enroll.level.id,
-            classe: enroll.classe.id,
+            speciality: enroll.speciality_display.id,
+            level: enroll.level_display.id,
+            classe: enroll.classe_display.id,
             year: enroll.year,
             is_delegate: enroll.is_delegate
         }
-    } else {
-        enrollment.value.form.speciality = formId.value.speciality
-        enrollment.value.form.level = formId.value.level
-        enrollment.value.form.classe = formId.value.classe
-    }
+
+        select.value = {
+            speciality: enroll.speciality_display,
+            level: enroll.level_display,
+            classe: enroll.classe_display,
+        }
+
+    }// else {
+    //     select.value = {
+    //         speciality: {},
+    //         level: {},
+    //         classe: {},
+    //     }
+    // }
     enrollment.value.form.student = data.value.student.id
     enrollment.value.showModal = true
 }
@@ -506,6 +518,17 @@ function resetFormEnrollment(){
     enrollment.value.showModal = false
     resetImage()
 	enrollment.value.form = ValidatedUtil.clearFormData(enrollment.value.form)
+    enrollment.value.form.is_delegate = false
+}
+
+function setObjectEnrollment(data){
+    return {
+        speciality: data.speciality_display,
+        level: data.level_display,
+        classe: data.classe_display,
+        year: data.year,
+        is_delegate: data.is_delegate
+    }
 }
 
 function validatedEnrollment(){
@@ -513,6 +536,11 @@ function validatedEnrollment(){
 	enrollment.value.errors = result.errors
     
 	if(result.success){
+
+        enrollment.value.form.speciality = select.value.speciality.id
+        enrollment.value.form.level = select.value.level.id
+        enrollment.value.form.classe = select.value.classe.id
+        
         if (enrollment.value.form.id) {
             updateEnrollment(enrollment.value.form)
         } else {
@@ -531,15 +559,19 @@ function setEnrollment(formData){
         resetFormEnrollment()
 		Notification.success("Inscription enregister avec succes.")
 	}).catch((error) => {
-		Notification.error("Erreur lors de la l'enregistrement des données.")
 		enrollment.value.errors = error.response.data
+        if (error.response.data?.non_field_errors) {
+            Notification.error("Une inscription pour cette spécialité et pour cet étudiant existe dejat.")
+        } else {   
+		    Notification.error("Une erreur s'est produit lors de l'enregistrement, verifiez les informations et reéssayez.")
+        }
 	}).finally(() => enrollment.value.is_loading = false)
 }
 
 function updateEnrollment(formData){
 	enrollment.value.is_loading = true
 	
-	StudentService.updateEnrollment(data.value.student.id, formData).then((res) => {
+	StudentService.updateEnrollment(formData.id, formData).then((res) => {
         data.value.student = res.data
         data.value.enrollments = data.value.enrollments.map(
             enroll => enroll.id == res.data.id ? res.data : enroll
@@ -547,8 +579,12 @@ function updateEnrollment(formData){
         resetFormEnrollment()
 		Notification.success("Inscription modifié avec succes.")
 	}).catch((error) => {
-		Notification.error("Erreur lors de la modification des données.")
 		enrollment.value.errors = error.response.data
+        if (error.response.data?.non_field_errors) {
+            Notification.error("Une inscription pour cette spécialité et pour cet étudiant existe dejat.")
+        } else {   
+		    Notification.error("Une erreur s'est produit lors de l'enregistrement, verifiez les informations et reéssayez.")
+        }
 	}).finally(() => enrollment.value.is_loading = false)
 }
 

@@ -42,7 +42,7 @@
                                         </li>
 
                                         <li>
-                                            <RouterLink :to="{name: 'student-detail', params:{id: '43'}}" exact-active-class="menu-active">
+                                            <RouterLink :to="{name: 'student-detail', params:{id: '2'}}" exact-active-class="menu-active">
                                                 <AddIcon class="size-(--icon-size)" />
                                                 Détail
                                             </RouterLink>
