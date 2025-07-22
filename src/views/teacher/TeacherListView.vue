@@ -5,11 +5,11 @@
 		<header class="w-full bg-base-100 border border-base-300 flex justify-between items-center p-3 rounded-box">
 
 			<!-- title -->
-			<h1 class="text-xl text-nowrap">Liste des Etudiants</h1>
+			<h1 class="text-xl text-nowrap">Liste des Enseignants</h1>
 
 			<div class="flex gap-3 items-center">
-				<button data-tip="Nouveaux Etudiant" class="btn btn-neutral tooltip tooltip-left btn-sm text-nowrap">
-					<RouterLink :to="{name: 'student-add'}">
+				<button data-tip="Nouveaux Enseignant" class="btn btn-neutral tooltip tooltip-left btn-sm text-nowrap">
+					<RouterLink :to="{name: 'teacher-add'}">
 						<AddIcon class="size-(--icon-size)" />
 					</RouterLink>
 				</button>
@@ -24,7 +24,7 @@
 					/>
 				</label>
 
-				<button @click="refresch_student" :disabled="!search.q" class="btn btn-accent tooltip tooltip-left" data-tip="Rafraichir">
+				<button @click="refresch_teacher" :disabled="!search.q" class="btn btn-accent tooltip tooltip-left" data-tip="Rafraichir">
 					<RefreschIcon class="size-(--icon-size)"/>
 				</button>
 			</div>
@@ -93,7 +93,7 @@
 							</th>
 							<th>Nom</th>
 							<th>Contact</th>
-							<th>Date & lieux de Naiss</th>
+							<th>Grade</th>
 							<th>Nationnalité</th>
 							<th></th>
 						</tr>
@@ -102,7 +102,7 @@
 						<!-- row -->
 
 						<!-- simulation -->
-						<tr v-if="is_loading_student">
+						<tr v-if="is_loading_teacher">
 							<th>
 								<div class=" size-6 skeleton rounded-md"></div>
 							</th>
@@ -143,51 +143,48 @@
 							</th>
 						</tr>
 
-						<tr v-for="student in students" :key="student.id">
+						<tr v-for="teacher in teachers" :key="teacher.id">
 							<th>
 								<label>
 									<input type="checkbox" class="checkbox" 
-										:checked="isSelected(student.id)" 
-										@change="toggleItem(student.id)"
+										:checked="isSelected(teacher.id)" 
+										@change="toggleItem(teacher.id)"
 									/>
 								</label>
 							</th>
 
 							<td>
 								<div class="flex items-center gap-3">
-									<div class="avatar indicator" :class="student.enrollments.is_delegate ? 'tooltip tooltip-right' : ''" data-tip="Délégué">
-										<span v-if="student.enrollments.is_delegate" class="indicator-item status status-accent status-lg -translate-0.5 outline-2 outline-base-100"></span>
+									<div class="avatar">
 										<div class="mask mask-squircle h-12 w-12">
 											<img
 											src="https://img.daisyui.com/images/profile/demo/2@94.webp"
 											alt="Avatar Tailwind CSS Component" />
 										</div>
 									</div>
-									<div :data-tip="`${student.user?.last_name} ${student.user?.first_name}`" class="tooltip tooltip-right">
+									<div :data-tip="`${teacher.user?.last_name} ${teacher.user?.first_name}`" class="tooltip tooltip-right">
 										<div class="tooltip tooltip-right font-bold text-nowrap text-ellipsis max-w-[90%] overflow-hidden">
-											{{ `${student.user?.last_name} ${student.user?.first_name}` }}
+											{{ `${teacher.user?.last_name} ${teacher.user?.first_name}` }}
 										</div>
-										<div class="text-sm opacity-50 uppercase">#{{ student.user?.code }}</div>
+										<div class="text-sm opacity-50 uppercase">#{{ teacher.user?.code }}</div>
 									</div>
 								</div>
 							</td>
 
 							<td>
-								{{ student.user?.email ?? '---' }}
+								<span class="opacity-50 text-xs">Email: </span> {{ teacher.user?.email ?? '---' }}
 								<br />
-								<span class="badge badge-ghost badge-sm">{{ student.user?.phone ?? '---' }}</span>
+								<span class="badge badge-ghost badge-sm">{{ teacher.user?.phone ?? '---' }}</span>
 							</td>
 
 							<td>
-								{{ student.birth_date ?? '---' }}
-								<br />
-								<div class="text-sm opacity-50">{{ student.birth_place ?? '---' }}</div>
+								{{ teacher.grade ?? '---' }}
 							</td>
 
 							<td>
-								{{ student.user?.nationnality ?? '---' }}
+								{{ teacher.user?.nationnality ?? '---' }}
 								<br />
-								<div class="text-sm opacity-50">{{ student.user?.address ?? '---' }}</div>
+								<div class="text-sm opacity-50">{{ teacher.user?.address ?? '---' }}</div>
 							</td>
 
 							<th>
@@ -204,7 +201,7 @@
 											</button>
 										</li>
 										<li>
-											<button @click="showDeleteModalF(student)" class="btn btn-ghostj btn-soft btn-error btn-sm text-sm justify-start">
+											<button @click="showDeleteModalF(teacher)" class="btn btn-ghostj btn-soft btn-error btn-sm text-sm justify-start">
 												<DeleteIcon class="size-(--icon-size) kbd border border-error p-[2px] bg-error/10" />
 												Suprimer
 											</button>
@@ -215,17 +212,6 @@
 						</tr>
 
 						</tbody>
-						<!-- foot -->
-						<tfoot>
-						<tr>
-							<th></th>
-							<th>Nom</th>
-							<th>Contact</th>
-							<th>Date & lieux de Naiss</th>
-							<th>Nationnalité</th>
-							<th></th>
-						</tr>
-						</tfoot>
 					</table>
 				</div>
 			</div>
@@ -235,10 +221,160 @@
 				<Pargination :data="paginate" @new="new_page" />
 			</div>
 		</div>
+
+		<!-- la liste des enseignant sans classe -->
+		<div class="space-y-3">
+			<div class="flex items-center alert alert-error alert-soft">
+				<button class="btn btn-error btn-ghost btn-soft border border-error btn-sm justify-start">
+					<EyeIcon class="size-(--icon-size) p-[1px]" />
+					visualiser
+				</button>
+								
+				<p class="">Affichier les Enseignants qui n'ont pas de classe.</p>
+			</div>
+
+			<div class="w-full bg-base-100 border border-base-300 p-3 rounded-box flex flex-col gap-3">
+
+				<!-- list -->
+				<div>
+
+					<div class="overflow-x-auto">
+						<table class="table">
+							<!-- head -->
+							<thead>
+							<tr>
+								<th></th>
+								<th>Nom</th>
+								<th>Contact</th>
+								<th>Grade</th>
+								<th>Nationnalité</th>
+								<th></th>
+							</tr>
+							</thead>
+							<tbody>
+							<!-- row -->
+
+							<!-- simulation -->
+							<tr v-if="is_loading_teacher">
+								<th>
+									<div class=" size-6 skeleton rounded-md"></div>
+								</th>
+
+								<td>
+									<div class="flex items-center gap-3">
+										<div class="mask mask-squircle size-12 skeleton"></div>
+										<div class=" space-y-2">
+											<div class="h-2 w-24 skeleton"></div>
+											<div class="h-2 w-14 skeleton"></div>
+										</div>
+									</div>
+								</td>
+
+								<td>
+									<div class=" space-y-2">
+										<div class="h-2 w-24 skeleton"></div>
+										<div class="h-2 w-14 skeleton"></div>
+									</div>
+								</td>
+
+								<td>
+									<div class=" space-y-2">
+										<div class="h-2 w-24 skeleton"></div>
+										<div class="h-2 w-14 skeleton"></div>
+									</div>
+								</td>
+
+								<td>
+									<div class=" space-y-2">
+										<div class="h-2 w-24 skeleton"></div>
+										<div class="h-2 w-14 skeleton"></div>
+									</div>
+								</td>
+
+								<th>
+									<div class="h-4 w-8 skeleton"></div>
+								</th>
+							</tr>
+
+							<tr v-for="teacher in teachers" :key="teacher.id">
+								<th>
+									<label>
+										<input type="checkbox" class="checkbox" 
+											:checked="isSelected(teacher.id)" 
+											@change="toggleItem(teacher.id)"
+										/>
+									</label>
+								</th>
+
+								<td>
+									<div class="flex items-center gap-3">
+										<div class="avatar">
+											<div class="mask mask-squircle h-12 w-12">
+												<img
+												src="https://img.daisyui.com/images/profile/demo/2@94.webp"
+												alt="Avatar Tailwind CSS Component" />
+											</div>
+										</div>
+										<div :data-tip="`${teacher.user?.last_name} ${teacher.user?.first_name}`" class="tooltip tooltip-right">
+											<div class="tooltip tooltip-right font-bold text-nowrap text-ellipsis max-w-[90%] overflow-hidden">
+												{{ `${teacher.user?.last_name} ${teacher.user?.first_name}` }}
+											</div>
+											<div class="text-sm opacity-50 uppercase">#{{ teacher.user?.code }}</div>
+										</div>
+									</div>
+								</td>
+
+								<td>
+									<span class="opacity-50 text-xs">Email: </span> {{ teacher.user?.email ?? '---' }}
+									<br />
+									<span class="badge badge-ghost badge-sm">{{ teacher.user?.phone ?? '---' }}</span>
+								</td>
+
+								<td>
+									{{ teacher.grade ?? '---' }}
+								</td>
+
+								<td>
+									{{ teacher.user?.nationnality ?? '---' }}
+									<br />
+									<div class="text-sm opacity-50">{{ teacher.user?.address ?? '---' }}</div>
+								</td>
+
+								<th>
+									<div class="dropdown dropdown-end">
+
+										<button tabindex="0" class="btn btn-ghost btn-xs">
+											<MenuIcon class="size-(--icon-size)" />
+										</button>
+										<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-2xl border border-base-300 font-medium">
+											<li>
+												<button class="btn btn-ghost btn-sm text-sm justify-start">
+													<EditIcon class="size-(--icon-size) kbd border p-[2px]" />
+													Editer
+												</button>
+											</li>
+											<li>
+												<button @click="showDeleteModalF(teacher)" class="btn btn-ghostj btn-soft btn-error btn-sm text-sm justify-start">
+													<DeleteIcon class="size-(--icon-size) kbd border border-error p-[2px] bg-error/10" />
+													Suprimer
+												</button>
+											</li>
+										</ul>
+									</div>
+								</th>
+							</tr>
+
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+			</div>
+		</div>
 					
 		<Modal
 			v-model="showDeleteModal"
-			title="Supprimer l'élément"
+			title="Supprimer les Enseignants"
 			message="Cette action est irréversible. Êtes-vous sûr de vouloir supprimer cet élément ?"
 			confirm-text="Supprimer"
 			cancel-text="Conserver"
@@ -251,8 +387,8 @@
 
 <script setup>
 import { 
-	AddIcon, SearchIcon, MenuIcon, EditIcon, DeleteIcon,
-	RefreschIcon, FilterIcon, CheckIcon,
+	AddIcon, SearchIcon, MenuIcon, EditIcon, DeleteIcon, EyeIcon,
+	RefreschIcon, FilterIcon, CheckIcon
 } from '@/components/icons';
 import SelectFilter from '@/components/SelectFilterComponent.vue';
 import Modal from '@/components/ModalComponent.vue'
@@ -261,13 +397,13 @@ import { useFilters } from '@/composables/useFiltersComposable'
 import { usePargination } from '@/composables/useParginationComposable';
 import { useCheckbox } from '@/composables/useCheckboxComposable';
 import { useUnivercityYearStore } from '@/stores/yearStore';
-import { StudentService } from '@/services';
+import { TeacherService } from '@/services';
 import { onMounted, ref, watch, computed } from 'vue';
 import { NotificationUtil } from '@/utils';
 
 const Notification = NotificationUtil.notificationsUtil()
 
-const students = ref([])
+const teachers = ref([])
 const search = ref({
 	q: null
 })
@@ -296,18 +432,18 @@ const {
 	isSelected,
 	toggleAll,
 	toggleItem
-} = useCheckbox(students)
+} = useCheckbox(teachers)
 
 const yearStore = useUnivercityYearStore()
 
-const is_loading_student = ref(false)
+const is_loading_teacher = ref(false)
 const showDeleteModal = ref(false)
 const deleteLoading = ref(false)
 
 watch(
 	[() => select.value.classe, () => yearStore.currentYear, () => search.value.q], 
 	([classe, year, q])=> {
-	getStudents({
+	getTeachers({
 		level: select.value.level?.id,
 		speciality: select.value.speciality?.id,
 		department: null,
@@ -317,10 +453,10 @@ watch(
 })
 
 watch(()=> paginate.value, (pag)=> {
-	students.value = pag?.data?.results
+	teachers.value = pag?.data?.results
 }, {deep: true})
 
-function getStudents(options={
+function getTeachers(options={
 	level: select.value.level?.id,
 	speciality: select.value.speciality?.id,
 	department: null,
@@ -328,20 +464,20 @@ function getStudents(options={
 	search: null
 }){
 	
-	is_loading_student.value = true
-	StudentService.getStudents(options).then((res) => {
+	is_loading_teacher.value = true
+	TeacherService.getTeachers(options).then((res) => {
 		refresch_paginate(res.data)
-	}).finally(()=> is_loading_student.value = false)
+	}).finally(()=> is_loading_teacher.value = false)
 }
 
-function refresch_student(){
+function refresch_teacher(){
 	search.value.q = null
 }
 
-function delete_student(id){
-	StudentService.deleteStudent(id).then((res)=>{
-		students.value = students.value.filter(
-			stud => stud.id != id
+function delete_teacher(id){
+	TeacherService.deleteTeacher(id).then((res)=>{
+		teachers.value = teachers.value.filter(
+			steacher => steacher.id != id
 		)
 		Notification.success("Suppréssion réussir.")
 	}).catch((error) => Notification.error("Une erreur innatendus s'est produit, veuillez réessayer."))
@@ -353,9 +489,9 @@ function delete_student(id){
 
 function delete_all(){
 	const form = {ids: selectedItems.value}
-	StudentService.deleteStudentsIDS(form).then((res)=>{
-		students.value = students.value.filter(
-			stud => !res.data.deleted.includes(stud.id)
+	TeacherService.deleteTeachersIDS(form).then((res)=>{
+		teachers.value = teachers.value.filter(
+			teacher => !res.data.deleted.includes(teacher.id)
 		)
 		selectedItems.value = []
 		Notification.success("Suppréssion réussir.")
@@ -366,21 +502,21 @@ function delete_all(){
 	})
 }
 
-const student_click = ref(null)
-function showDeleteModalF(student=null){
+const teacher_click = ref(null)
+function showDeleteModalF(teacher=null){
 	showDeleteModal.value = true
-	student_click.value = student
+	teacher_click.value = teacher
 }
 
 function closeDeleteModalF(){
 	showDeleteModal.value = false
-	student_click.value = null
+	teacher_click.value = null
 }
 
 function handleDelete(){
 	deleteLoading.value = true
-	if (student_click.value) {
-		delete_student(student_click.value.id)
+	if (teacher_click.value) {
+		delete_teacher(teacher_click.value.id)
 	} else {
 		delete_all()
 	}

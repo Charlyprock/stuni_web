@@ -86,34 +86,41 @@
                 </div>
 
                 <div class="space-y-3 mt-5">
-                    <div v-for="attachment in data.attachments" :key="attachment.id" 
-                         class="p-2 rounded-field flex justify-between items-center bg-base-200/30 border border-base-300/50">
-                        <div class="flex items-center gap-2">
-                            <div class="p-2 bg-base-200 rounded-field">
-                                <FileIcon class="" />
-                            </div>
+                    <div v-for="attachment in data.attachments" :key="attachment.id" class="p-2 rounded-field bg-base-200/30 border border-base-300/50">
+                        
+                        <div class=" flex justify-between items-center">
                             
-                            <div>
-                                <p>{{ attachment.title || attachment.file_name }}</p>
-                                <p class="text-sm opacity-50">{{ DateUtil.SetformatDate(attachment.created_at) }}</p>
-                                <p class="text-xs opacity-50">{{ attachment.mime_type }}</p>
+                            <div class="flex items-center gap-2">
+                                <div class="p-2 bg-base-200 rounded-field">
+                                    <FileIcon class="" />
+                                </div>
+                                
+                                <div>
+                                    <p>{{ attachment.title || attachment.file_name }}</p>
+                                    <p class="text-sm opacity-50">{{ DateUtil.SetformatDate(attachment.created_at) }}</p>
+                                </div>
+
+                            </div>
+
+                            <div class="flex items-center">
+                                <button @click="downloadAttachment(attachment)" 
+                                        data-tip="Télécharger le fichier" 
+                                        class="btn btn-neutral btn-ghost btn-sm tooltip tooltip-top"
+                                        :disabled="attachement.is_loading.download">
+                                    <LoadingIcon v-if="attachement.is_loading.download && attachement.current_id === attachment.id" class="animate-spin" />
+                                    <DownloadIcon v-else class="" />
+                                </button>
+
+                                <button @click="confirmDeleteAttachment(attachment)" 
+                                        data-tip="Supprimer le fichier" 
+                                        class="btn btn-error btn-ghost btn-sm tooltip tooltip-top tooltip-error">
+                                    <DeleteIcon class="" />
+                                </button>
                             </div>
                         </div>
-
-                        <div class="flex items-center">
-                            <button @click="downloadAttachment(attachment)" 
-                                    data-tip="Télécharger le fichier" 
-                                    class="btn btn-neutral btn-ghost btn-sm tooltip tooltip-top"
-                                    :disabled="attachement.is_loading.download">
-                                <LoadingIcon v-if="attachement.is_loading.download && attachement.current_id === attachment.id" class="animate-spin" />
-                                <DownloadIcon v-else class="" />
-                            </button>
-
-                            <button @click="confirmDeleteAttachment(attachment)" 
-                                    data-tip="Supprimer le fichier" 
-                                    class="btn btn-error btn-ghost btn-sm tooltip tooltip-top tooltip-error">
-                                <DeleteIcon class="" />
-                            </button>
+                        
+                        <div class="flex justify-end">
+                            <p class="text-xs opacity-50">{{ attachment.mime_type }}</p>
                         </div>
                     </div>
                 </div>
@@ -390,7 +397,7 @@
 import { 
 	WorkIcon, EditIcon, DeleteIcon, AddIcon,
 	CheckIcon, DownloadIcon, FileIcon, LoadingIcon,
-	HiddenPasswordIcon, VuePasswordIcon,
+	EyeOffIcon, EyeIcon,
 } from '@/components/icons';
 import SelectFilter from '@/components/SelectFilterComponent.vue';
 import Modal from '@/components/ModalComponent.vue'

@@ -9,8 +9,8 @@ import DirectionIcon from "./DirectionIcon.vue"
 import FilterIcon from "./FilterIcon.vue"
 import CheckIcon from "./CheckIcon.vue"
 import LoadingIcon from "./LoadingIcon.vue"
-import VuePasswordIcon from "./VuePasswordIcon.vue"
-import HiddenPasswordIcon from "./HiddenPasswordIcon.vue"
+import EyeIcon from "./EyeIcon.vue"
+import EyeOffIcon from "./EyeOffIcon.vue"
 import ImagePlusIcon from "./ImagePlusIcon.vue"
 import RefreschIcon from "./RefreschIcon.vue"
 import DetailIcon from "./DetailIcon.vue"
@@ -31,8 +31,8 @@ export {
     FilterIcon,
     CheckIcon,
     LoadingIcon,
-    VuePasswordIcon,
-    HiddenPasswordIcon,
+    EyeIcon,
+    EyeOffIcon,
     ImagePlusIcon,
     RefreschIcon,
     DetailIcon,

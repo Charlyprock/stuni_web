@@ -40,8 +40,8 @@
                                     />
 
                                     <button @click="togglePasswordVisibility" class="label cursor-pointer">
-                                        <VuePasswordIcon v-if="!isShowPassword" class=" size-(--icon-size)" />
-                                        <HiddenPasswordIcon v-if="isShowPassword" class=" size-(--icon-size)" />
+                                        <EyeIcon v-if="!isShowPassword" class=" size-(--icon-size)" />
+                                        <EyeOffIcon v-if="isShowPassword" class=" size-(--icon-size)" />
                                     </button>
                                 </label>
                             </div>
@@ -65,8 +65,8 @@
 
 <script setup>
 import { 
-    VuePasswordIcon, MatriculeIcon, 
-    PasswordIcon, HiddenPasswordIcon ,
+    EyeIcon, MatriculeIcon, 
+    PasswordIcon, EyeOffIcon ,
     LoadingIcon,
 } from '@/components/icons';
 import { ref } from 'vue';
